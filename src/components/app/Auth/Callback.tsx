@@ -9,16 +9,14 @@ const Callback: React.FC<RouteComponentProps> = () => {
   const [state, setState] = useState(false);
 
   useEffect(() => {
-    try {
-      auth.handleAuthentication()
-      setState(true);
-    } catch (e) {
-      console.log(`Error dealing with auth0 ${JSON.stringify(e)}`)
-    }
+    auth
+      .handleAuthentication()
+      .then(_ => setState(true))
+      .catch(e => console.log(`Error dealing with auth0 ${JSON.stringify(e)}`));
   }, []);
 
   if(state){
-    return <Redirect to='/dashboard' />;
+    return <Redirect to='/dashboard' noThrow={true} />;
   }
 
   return (

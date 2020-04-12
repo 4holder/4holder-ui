@@ -1,4 +1,5 @@
-import auth0 from 'auth0-js';
+import auth0, {Auth0DecodedHash} from 'auth0-js';
+import moment from 'moment';
 
 const { env } = process;
 
@@ -9,6 +10,11 @@ interface WebAuthOptions {
   audience: string;
   responseType: string;
   scope: string;
+}
+
+interface TokenInfo {
+  idToken: string;
+  expiresIn: number;
 }
 
 const webAuthOptions = {
@@ -24,7 +30,6 @@ const loginUrl = env.REACT_APP_LOGIN_URL || 'http://localhost:3000';
 
 class Auth {
   private auth0: auth0.WebAuth;
-  private idToken: string = "";
   private expiresAt: any;
 
   constructor() {
@@ -40,23 +45,42 @@ class Auth {
     this.auth0.authorize();
   }
 
-  handleAuthentication() {
-    this.auth0.parseHash({ hash: window.location.hash },(err, authResult) => {
-      if (authResult && authResult.accessToken && authResult.idToken) {
-        this.setSession(authResult)
-      }
+  async handleAuthentication() {
+    return new Promise((resolve, reject) => {
+      this.auth0.parseHash({ hash: window.location.hash },
+        (err, authResult: Auth0DecodedHash | null) => {
+        if (authResult && authResult.accessToken && authResult.idToken) {
+          this.setSession(authResult.idToken, authResult.expiresIn);
+          return resolve();
+        }
 
-      throw err;
+        return reject(err);
+      });
     });
   }
 
-  setSession(authResult: any) {
-    this.idToken = authResult.idToken;
+  setSession(idToken: string, expiresIn?: number) {
+    const tokenInfo = {
+      idToken,
+      expiresAt: expiresIn,
+    };
 
-    this.expiresAt = authResult.expiresIn * 1000 + new Date().getTime();
+    localStorage.setItem('tokenInfo', JSON.stringify(tokenInfo));
+  }
+
+  isAuthenticated() {
+    const item = localStorage.getItem('tokenInfo') || '';
+
+    if(!item) {
+      return false;
+    }
+    const tokenInfo: TokenInfo = JSON.parse(item);
+
+    return !!tokenInfo.idToken;
   }
 
   logout() {
+    localStorage.removeItem('tokenInfo');
     this.auth0.logout({
       returnTo: loginUrl,
       clientID: webAuthOptions.clientID,
@@ -71,10 +95,6 @@ class Auth {
         resolve();
       });
     });
-  }
-
-  isAuthenticated() {
-    return new Date().getTime() < this.expiresAt;
   }
 }
 

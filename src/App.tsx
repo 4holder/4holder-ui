@@ -13,8 +13,8 @@ const AuthenticatedPages = () => {
   return (
     <Router className="fullScreen">
       <AuthenticatedPage path="/">
-        <Dashboard path="/dashboard" />
-        <NotFound default path="/not_found" />
+        <Dashboard path="dashboard" />
+        <NotFound default path="not_found" />
       </AuthenticatedPage>
       <NotFound default path="/not_found" />
     </Router>
@@ -30,9 +30,7 @@ const OpenPages = () => (
 );
 
 const App = () => {
-  const { user } = { user: auth.isAuthenticated() };
-
-  return user ? (
+  return auth.isAuthenticated() ? (
     <UserProvider>
       <AuthenticatedPages />
     </UserProvider>
