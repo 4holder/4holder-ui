@@ -1,26 +1,45 @@
 import React from 'react';
-import logo from './logo.svg';
+import { Router } from "@reach/router";
+import { UserProvider } from "./auth/UserContext";
 import './App.css';
+import NotFound from "./components/app/NotFound";
+import Dashboard from "./components/app/Dashboard";
+import AuthenticatedPage from "./components/app/AuthenticatedPage";
+import Callback from "./components/app/Auth/Callback";
+import Home from "./components/app/Home";
+import auth from "./auth/auth";
 
-function App() {
+const AuthenticatedPages = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router className="fullScreen">
+      <AuthenticatedPage path="/">
+        <Dashboard path="/dashboard" />
+        <NotFound default path="/not_found" />
+      </AuthenticatedPage>
+      <NotFound default path="/not_found" />
+    </Router>
   );
-}
+};
+
+const OpenPages = () => (
+  <Router className="fullScreen">
+    <Home path='/' />
+    <Callback path='/callback' />
+    <NotFound default path="/not_found" />
+  </Router>
+);
+
+const App = () => {
+  const { user } = { user: auth.isAuthenticated() };
+
+  return user ? (
+    <UserProvider>
+      <AuthenticatedPages />
+    </UserProvider>
+  ) : (
+    <OpenPages />
+  );
+};
+
 
 export default App;
