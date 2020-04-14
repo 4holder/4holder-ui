@@ -11,7 +11,9 @@ const Callback: React.FC<RouteComponentProps> = () => {
   useEffect(() => {
     auth
       .handleAuthentication()
-      .then(_ => setState(true))
+      .then(_ => {
+        setState(true);
+      })
       .catch(e => console.log(`Error dealing with auth0 ${JSON.stringify(e)}`));
   }, []);
 

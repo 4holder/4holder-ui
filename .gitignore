@@ -26,3 +26,17 @@ yarn-error.log*
 .idea
 
 .env
+
+
+#  Local .terraform directories
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# .tfvars files
+*.tfvars
+
+#Credentials file
+infra/credentials/account.json

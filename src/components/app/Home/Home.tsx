@@ -1,14 +1,8 @@
 import React from 'react';
-import { Redirect, RouteComponentProps } from '@reach/router';
+import { RouteComponentProps } from '@reach/router';
 import auth from '../../../auth/auth';
 
-
 const Home: React.FC<RouteComponentProps> = () => {
-  const logout = () => {
-    auth.logout();
-    return (<Redirect to={`/`} noThrow />);
-  };
-
   return (
     <div style={
       {
@@ -23,9 +17,7 @@ const Home: React.FC<RouteComponentProps> = () => {
       <hr />
       <br />
 
-      {
-        <a href="#" className="btn btn-info log" onClick={() => auth.login()}>Área do cliente</a>
-      }
+      <button className="btn btn-info log" onClick={() => auth.login()}>Área do cliente!</button>
     </div>
   );
 };

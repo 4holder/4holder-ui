@@ -1,39 +1,16 @@
 import auth0, {Auth0DecodedHash} from 'auth0-js';
-import moment from 'moment';
-
-const { env } = process;
-
-interface WebAuthOptions {
-  domain: string;
-  clientID: string;
-  redirectUri: string;
-  audience: string;
-  responseType: string;
-  scope: string;
-}
+import config from "../config";
 
 interface TokenInfo {
   idToken: string;
   expiresIn: number;
 }
 
-const webAuthOptions = {
-  domain: env.REACT_APP_AUTH0_DOMAIN,
-  clientID: env.REACT_APP_AUTH0_CLIENT_ID,
-  redirectUri: env.REACT_APP_AUTH0_CALLBACK_URL,
-  audience: env.REACT_APP_AUTH0_AUDIENCE,
-  responseType: 'token id_token',
-  scope: 'openid email'
-} as WebAuthOptions;
-
-const loginUrl = env.REACT_APP_LOGIN_URL || 'http://localhost:3000';
-
 class Auth {
   private auth0: auth0.WebAuth;
-  private expiresAt: any;
 
   constructor() {
-    this.auth0 = new auth0.WebAuth(webAuthOptions);
+    this.auth0 = new auth0.WebAuth(config.auth0);
 
     this.login = this.login.bind(this);
     this.logout = this.logout.bind(this);
@@ -82,8 +59,8 @@ class Auth {
   logout() {
     localStorage.removeItem('tokenInfo');
     this.auth0.logout({
-      returnTo: loginUrl,
-      clientID: webAuthOptions.clientID,
+      returnTo: config.dashboardUrl,
+      clientID: config.auth0.clientID,
     });
   }
 

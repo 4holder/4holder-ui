@@ -1,6 +1,5 @@
 import React from 'react';
 import { Router } from "@reach/router";
-import { UserProvider } from "./auth/UserContext";
 import './App.css';
 import NotFound from "./components/app/NotFound";
 import Dashboard from "./components/app/Dashboard";
@@ -16,26 +15,26 @@ const AuthenticatedPages = () => {
         <Dashboard path="dashboard" />
         <NotFound default path="not_found" />
       </AuthenticatedPage>
+      <Home path='/' />
+      <Callback path='/callback' />
+      <NotFound default path="/not_found" />
       <NotFound default path="/not_found" />
     </Router>
   );
 };
 
-const OpenPages = () => (
-  <Router className="fullScreen">
-    <Home path='/' />
-    <Callback path='/callback' />
-    <NotFound default path="/not_found" />
-  </Router>
-);
 
 const App = () => {
-  return auth.isAuthenticated() ? (
-    <UserProvider>
-      <AuthenticatedPages />
-    </UserProvider>
-  ) : (
-    <OpenPages />
+  return (
+    <div>
+      {
+        auth.isAuthenticated() ? (
+          <AuthenticatedPages />
+        ) : (
+          <AuthenticatedPages />
+        )
+      }
+    </div>
   );
 };
 
