@@ -4,7 +4,7 @@ import {
   Typography,
   AppBar,
   Toolbar,
-  Grid
+  Grid, Link
 } from "@material-ui/core";
 import auth from "../../../auth/auth";
 
@@ -19,7 +19,7 @@ export const TopNav: React.FC = () => {
         >
           <Grid item>
             <Typography variant="h6" component="span">
-              4holder
+              <Link href="/" color={"textSecondary"}>4holder</Link>
             </Typography>
           </Grid>
 

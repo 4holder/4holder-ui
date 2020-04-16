@@ -39,10 +39,22 @@ class Auth {
   setSession(idToken: string, expiresIn?: number) {
     const tokenInfo = {
       idToken,
-      expiresAt: expiresIn,
-    };
+      expiresIn: expiresIn,
+    } as TokenInfo;
 
     localStorage.setItem('tokenInfo', JSON.stringify(tokenInfo));
+  }
+
+  getToken() {
+    const token = localStorage.getItem('tokenInfo');
+
+    if(!token) {
+      return null;
+    }
+
+    const tokenInfo: TokenInfo = JSON.parse(token);
+
+    return tokenInfo.idToken;
   }
 
   isAuthenticated() {
@@ -51,6 +63,7 @@ class Auth {
     if(!item) {
       return false;
     }
+
     const tokenInfo: TokenInfo = JSON.parse(item);
 
     return !!tokenInfo.idToken;

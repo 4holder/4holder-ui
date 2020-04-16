@@ -15,7 +15,7 @@ provider "google" {
 }
 
 resource "google_dns_record_set" "for_holder_ui_a_record" {
-  name = "${var.subdomain}.${var.dns_name}"
+  name = "${var.subdomain}${var.dns_name}"
   type = "A"
   ttl  = 300
 

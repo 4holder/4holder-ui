@@ -1,32 +1,27 @@
-import React from 'react';
-import { Redirect, RouteComponentProps } from '@reach/router';
-import auth from '../../../auth/auth';
-
+import React, {useEffect, useState} from 'react';
+import { RouteComponentProps } from '@reach/router';
+import {Typography} from "@material-ui/core";
+import Skeleton from "../../common/Skeleton/Skeleton";
+import { getUserProfile, UserProfile } from "../../../clients/publicApiClient";
 
 const Dashboard: React.FC<RouteComponentProps> = () => {
-	const logout = () => {
-		auth.logout();
-		return (<Redirect to={`/`} noThrow />);
-	};
+	const [
+		userProfile,
+		setState
+	] = useState({} as UserProfile);
+
+	useEffect( () => {
+		getUserProfile().then(userProfile => setState(userProfile));
+	}, []);
 
 	return (
-		<div>
-			<h1>
-			{
-				( auth.isAuthenticated() ) ? <b>Authenticated!</b> :  <i>Not authenticated!</i>
-			}
-			</h1>
-
-			<br />
-			<hr />
-			<br />
-
-			{
-				(auth.isAuthenticated()) ?
-					(<button className="btn btn-danger log" onClick={() => logout()}>Log out </button>) :
-					(<button className="btn btn-info log" onClick={() => auth.login()}>Log In</button>)
-			}
-		</div>
+		<Skeleton>
+			<Typography variant="h3" component="span">
+				<img src={userProfile.picture} height={100}/>
+				<br />
+				Seja bem vindo, {userProfile.firstName}!
+			</Typography>
+		</Skeleton>
 	);
 };
 
