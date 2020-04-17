@@ -28,6 +28,8 @@ class Auth {
         (err, authResult: Auth0DecodedHash | null) => {
         if (authResult && authResult.accessToken && authResult.idToken) {
           this.setSession(authResult.idToken, authResult.expiresIn);
+
+
           return resolve();
         }
 

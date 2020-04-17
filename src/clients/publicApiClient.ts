@@ -1,3 +1,4 @@
+import fetch from 'node-fetch';
 import { gql, InMemoryCache } from 'apollo-boost';
 import ApolloClient from 'apollo-client';
 import { setContext } from 'apollo-link-context';
@@ -5,8 +6,9 @@ import { createHttpLink } from 'apollo-link-http';
 import auth from "../auth/auth";
 import config from "../config";
 
+// @ts-ignore
 const httpLink = createHttpLink({
-  uri: config.apiUrl,
+  uri: config.apiUrl, fetch,
 });
 
 const authLink = setContext((_, { headers }) => {
@@ -41,6 +43,20 @@ export const getUserProfile: () => Promise<UserProfile> = () => {
           firstName
           email
           picture
+        }
+      }
+    `
+    })
+    .then(result => result.data.userProfile);
+};
+
+export const importAuth0User: () => Promise<UserProfile> = async () => {
+  return client
+    .mutate({
+      mutation: gql`
+      mutation importAuth0User {
+        importAuth0User {
+          id
         }
       }
     `
