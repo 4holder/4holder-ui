@@ -1,9 +1,24 @@
 import React, {useEffect, useState} from 'react';
-import auth from '../../../auth/auth';
 import { Redirect, RouteComponentProps } from "@reach/router";
+import { CircularProgress, createStyles, Grid, Theme, Typography } from "@material-ui/core";
+
 import { importAuth0User } from "../../../clients/publicApiClient";
+import auth from '../../../auth/auth';
+import {makeStyles} from "@material-ui/core/styles";
+
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    loadinText: {
+      padding: theme.spacing(2),
+      textAlign: 'center',
+      color: theme.palette.text.secondary,
+    },
+  }),
+);
+
 
 const Callback: React.FC<RouteComponentProps> = () => {
+  const classes = useStyles();
   const [isLoggedIng, setState] = useState(false);
 
   useEffect(() => {
@@ -13,7 +28,10 @@ const Callback: React.FC<RouteComponentProps> = () => {
         await importAuth0User();
         setState(true);
       })
-      .catch(e => console.log(`Error dealing with auth0 ${JSON.stringify(e)}`));
+      .catch(e => {
+        auth.clearSession();
+        console.log(`Error dealing with auth0 ${JSON.stringify(e)}`)
+      });
   }, []);
 
   if(isLoggedIng){
@@ -21,8 +39,22 @@ const Callback: React.FC<RouteComponentProps> = () => {
   }
 
   return (
-    <h1>Espere um pouco, carregando ..</h1>
-  );
+    <div>
+      <Grid
+        justify={"center"}
+        container
+        spacing={3}
+      >
+        <Grid item xs={12}>
+          <Typography className={classes.loadinText} variant={"h6"}>Espere um pouco, carregando ..</Typography>
+        </Grid>
+        <Grid item>
+          <CircularProgress />
+        </Grid>
+      </Grid>
+    </div>
+);
 };
 
 export default Callback;
+

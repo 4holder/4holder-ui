@@ -71,8 +71,12 @@ class Auth {
     return !!tokenInfo.idToken;
   }
 
-  logout() {
+  clearSession() {
     localStorage.removeItem('tokenInfo');
+  }
+
+  logout() {
+    this.clearSession();
     this.auth0.logout({
       returnTo: config.dashboardUrl,
       clientID: config.auth0.clientID,

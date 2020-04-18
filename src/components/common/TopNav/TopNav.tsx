@@ -4,15 +4,40 @@ import {
   Typography,
   AppBar,
   Toolbar,
-  Grid, Link, IconButton, Menu, MenuItem, Avatar
+  Grid,
+  Link,
+  IconButton,
+  MenuItem,
+  Avatar,
+  Theme,
+  createStyles,
+  Paper,
+  Popper,
+  Grow,
+  ClickAwayListener,
+  MenuList,
+  Divider
 } from "@material-ui/core";
 import auth from "../../../auth/auth";
 import { getUserProfile, UserProfile } from "../../../clients/publicApiClient";
 import { AccountCircle } from "@material-ui/icons";
+import { makeStyles } from "@material-ui/core/styles";
+
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    root: {
+      display: 'flex',
+    },
+    loadinText: {
+      marginRight: theme.spacing(2),
+    },
+  }),
+);
 
 export const TopNav: React.FC = () => {
+  const classes = useStyles();
   const [userProfile, setState] = useState({} as UserProfile);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const isMenuOpen = Boolean(anchorEl);
   const menuId = 'primary-search-account-menu';
 
@@ -40,28 +65,8 @@ export const TopNav: React.FC = () => {
     setAnchorEl(event.currentTarget);
   };
 
-  const renderMenu = (
-    <Menu
-      anchorEl={anchorEl}
-      anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-      id={menuId}
-      keepMounted
-      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-      open={isMenuOpen}
-      onClose={handleMenuClose}
-    >
-      <MenuItem onClick={handleMenuClose}>
-        {
-          (auth.isAuthenticated()) ?
-            (<Button color={"inherit"} onClick={() => auth.logout()}>Sair</Button>) :
-            (<Button color={"inherit"} onClick={() => auth.login()}>Entrar</Button>)
-        }
-      </MenuItem>
-    </Menu>
-  );
-
   return (
-    <div>
+    <div className={classes.root}>
       <AppBar>
         <Toolbar>
           <Grid
@@ -69,9 +74,9 @@ export const TopNav: React.FC = () => {
             container
             spacing={10}
           >
-            <Grid item style={{marginTop: "10px"}}>
-              <Typography  variant="h4" component="span">
-                <Link href="/" color={"textSecondary"}>4holder</Link>
+            <Grid item style={{marginTop: "15px"}}>
+              <Typography  variant="h5" component="span">
+                <Link underline={'none'} href="/" color={"textSecondary"}>4HOLDER</Link>
               </Typography>
             </Grid>
 
@@ -97,7 +102,43 @@ export const TopNav: React.FC = () => {
           </Grid>
         </Toolbar>
       </AppBar>
-      {renderMenu}
+      <Popper open={isMenuOpen} anchorEl={anchorEl} role={undefined} transition disablePortal>
+        {({ TransitionProps, placement }) => (
+          <Grow
+            {...TransitionProps}
+            style={{ transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom' }}
+          >
+            <Paper>
+              <ClickAwayListener onClickAway={handleMenuClose}>
+                <MenuList autoFocusItem={isMenuOpen} id="menu-list-grow">
+                  {
+                    (auth.isAuthenticated() && userProfile) ?
+                      (
+                        <div>
+                          <MenuItem>
+                            <Typography variant={"subtitle2"} color={"textSecondary"}>
+                              {userProfile.firstName} <br />
+                              {userProfile.email}
+                            </Typography>
+                          </MenuItem>
+                          <Divider />
+                        </div>
+                      ) : null
+                  }
+
+                  <MenuItem onClick={handleMenuClose}>
+                    {
+                      (auth.isAuthenticated()) ?
+                        (<Button color={"inherit"} onClick={() => auth.logout()}>Sair</Button>) :
+                        (<Button color={"inherit"} onClick={() => auth.login()}>Entrar</Button>)
+                    }
+                  </MenuItem>
+                </MenuList>
+              </ClickAwayListener>
+            </Paper>
+          </Grow>
+        )}
+      </Popper>
     </div>
   );
 };
