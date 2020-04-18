@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {ReactElement, useEffect, useState} from "react";
 import {
   Button,
   Typography,
@@ -22,19 +22,22 @@ import auth from "../../../auth/auth";
 import { getUserProfile, UserProfile } from "../../../clients/publicApiClient";
 import { AccountCircle } from "@material-ui/icons";
 import { makeStyles } from "@material-ui/core/styles";
+import clsx from "clsx";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       display: 'flex',
     },
-    loadinText: {
-      marginRight: theme.spacing(2),
-    },
   }),
 );
 
-export const TopNav: React.FC = () => {
+interface Props {
+  menuIcon?: ReactElement;
+  appBarShift?: any;
+}
+
+export const TopNav: React.FC<Props> = (props) => {
   const classes = useStyles();
   const [userProfile, setState] = useState({} as UserProfile);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
@@ -67,15 +70,15 @@ export const TopNav: React.FC = () => {
 
   return (
     <div className={classes.root}>
-      <AppBar>
+      <AppBar className={props.appBarShift}>
         <Toolbar>
           <Grid
-            justify="space-between"
+            justify={"space-between"}
             container
-            spacing={10}
           >
-            <Grid item style={{marginTop: "15px"}}>
-              <Typography  variant="h5" component="span">
+            <Grid item>
+              {props.menuIcon}
+              <Typography style={{marginTop: "15px", position: "absolute"}} variant="h6" component="span">
                 <Link underline={'none'} href="/" color={"textSecondary"}>4HOLDER</Link>
               </Typography>
             </Grid>
@@ -87,7 +90,14 @@ export const TopNav: React.FC = () => {
                   aria-label="account of current user"
                   aria-controls={menuId}
                   aria-haspopup="true"
-                  onClick={handleProfileMenuOpen}
+                  onClick={e => {
+                    if(!auth.isAuthenticated()) {
+                      auth.login();
+                      return;
+                    }
+
+                    handleProfileMenuOpen(e);
+                  }}
                   color="inherit">
                   <Avatar aria-label="recipe">
                     {
@@ -126,11 +136,11 @@ export const TopNav: React.FC = () => {
                       ) : null
                   }
 
-                  <MenuItem onClick={handleMenuClose}>
+                  <MenuItem>
                     {
                       (auth.isAuthenticated()) ?
                         (<Button color={"inherit"} onClick={() => auth.logout()}>Sair</Button>) :
-                        (<Button color={"inherit"} onClick={() => auth.login()}>Entrar</Button>)
+                        null
                     }
                   </MenuItem>
                 </MenuList>

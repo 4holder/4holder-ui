@@ -8,7 +8,7 @@ import {makeStyles} from "@material-ui/core/styles";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    loadinText: {
+    loadingText: {
       padding: theme.spacing(2),
       textAlign: 'center',
       color: theme.palette.text.secondary,
@@ -46,7 +46,7 @@ const Callback: React.FC<RouteComponentProps> = () => {
         spacing={3}
       >
         <Grid item xs={12}>
-          <Typography className={classes.loadinText} variant={"h6"}>Espere um pouco, carregando ..</Typography>
+          <Typography className={classes.loadingText} variant={"h6"}>Espere um pouco, carregando ..</Typography>
         </Grid>
         <Grid item>
           <CircularProgress />
