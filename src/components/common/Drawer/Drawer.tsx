@@ -3,7 +3,6 @@ import clsx from 'clsx';
 import { createStyles, makeStyles, useTheme, Theme } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
 import List from '@material-ui/core/List';
-import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
@@ -13,7 +12,9 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import DashboardIcon from '@material-ui/icons/Dashboard';
+import AttachMoneyIcon from '@material-ui/icons/AttachMoney';
 import { TopNav } from "../TopNav/TopNav";
+import {Link} from "@material-ui/core";
 
 const drawerWidth = 240;
 
@@ -71,7 +72,6 @@ const useStyles = makeStyles((theme: Theme) =>
       alignItems: 'center',
       justifyContent: 'flex-end',
       padding: theme.spacing(0, 1),
-      // necessary for content to be below app bar
       ...theme.mixins.toolbar,
     },
     content: {
@@ -140,6 +140,12 @@ const NavDrawer: React.FC = () => {
             <ListItemIcon><DashboardIcon /></ListItemIcon>
             <ListItemText primary="Dashboard" />
           </ListItem>
+          <Link underline={'none'} href="/incomes" color={"textSecondary"}>
+            <ListItem button key="Proventos">
+              <ListItemIcon><AttachMoneyIcon /></ListItemIcon>
+              <ListItemText primary="Proventos" />
+            </ListItem>
+          </Link>
         </List>
       </Drawer>
     </div>

@@ -1,8 +1,9 @@
 import fetch from 'node-fetch';
-import { gql, InMemoryCache } from 'apollo-boost';
+import {gql, InMemoryCache, QueryOptions} from 'apollo-boost';
 import ApolloClient from 'apollo-client';
 import { setContext } from 'apollo-link-context';
 import { createHttpLink } from 'apollo-link-http';
+
 import auth from "../auth/auth";
 import config from "../config";
 
@@ -50,6 +51,86 @@ export const getUserProfile: () => Promise<UserProfile> = () => {
     .then(result => result.data.userProfile);
 };
 
+export const CALCULATE_BASE_CLT_CONTRACT = gql`
+query(
+    $grossSalaryInCents: Int!, 
+    $dependentsQuantity: Int!,
+    $deductionsInCents: Int!) {
+  baseCLTContract(
+    grossSalaryInCents: $grossSalaryInCents, 
+    dependentsQuantity: $dependentsQuantity,
+    deductionsInCents: $deductionsInCents
+  ) {
+    grossSalary {
+      amount
+    }
+    netSalary {
+      name
+      incomeType
+      amount {
+        amount
+      }
+      discounts {
+        discountType
+        amount {
+          amount
+        }
+      }
+    }
+    thirteenthSalary {
+      name
+      incomeType
+      amount {
+        amount
+      }
+      discounts {
+        discountType
+        amount {
+          amount
+        }
+      }
+    }
+    thirteenthSalaryAdvance {
+      name
+      incomeType
+      amount {
+        amount
+      }
+      discounts {
+        discountType
+        amount {
+          amount
+        }
+      }
+    }
+  }
+}
+`;
+
+export const calculateBaseCLTContract = (
+  grossSalaryInCents: number,
+  dependentsQuantity: number,
+  deductionsInCents: number
+) => {
+  type Variables = {
+    grossSalaryInCents: number;
+    dependentsQuantity: number;
+    deductionsInCents: number;
+  }
+  const variables = {
+    grossSalaryInCents,
+    dependentsQuantity,
+    deductionsInCents,
+  } as Variables;
+
+  return client
+    .query({
+      query: CALCULATE_BASE_CLT_CONTRACT,
+      variables
+    } as QueryOptions<Variables>)
+    .then(result => result.data.baseCLTContract);
+};
+
 export const importAuth0User: () => Promise<UserProfile> = async () => {
   return client
     .mutate({
@@ -61,5 +142,5 @@ export const importAuth0User: () => Promise<UserProfile> = async () => {
       }
     `
     })
-    .then(result => result.data.userProfile);
+    .then(result => result.data.baseCLTContract);
 };

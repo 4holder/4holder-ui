@@ -22,7 +22,6 @@ import auth from "../../../auth/auth";
 import { getUserProfile, UserProfile } from "../../../clients/publicApiClient";
 import { AccountCircle } from "@material-ui/icons";
 import { makeStyles } from "@material-ui/core/styles";
-import clsx from "clsx";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
