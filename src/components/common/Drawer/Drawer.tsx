@@ -136,10 +136,12 @@ const NavDrawer: React.FC = () => {
         </div>
         <Divider />
         <List>
-          <ListItem button key="Dashboard">
-            <ListItemIcon><DashboardIcon /></ListItemIcon>
-            <ListItemText primary="Dashboard" />
-          </ListItem>
+          <Link underline={'none'} href="/dashboard" color={"textSecondary"}>
+            <ListItem button key="Dashboard">
+              <ListItemIcon><DashboardIcon /></ListItemIcon>
+              <ListItemText primary="Dashboard" />
+            </ListItem>
+          </Link>
           <Link underline={'none'} href="/incomes" color={"textSecondary"}>
             <ListItem button key="Proventos">
               <ListItemIcon><AttachMoneyIcon /></ListItemIcon>
