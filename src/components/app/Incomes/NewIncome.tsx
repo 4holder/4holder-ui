@@ -1,16 +1,22 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import { RouteComponentProps } from '@reach/router';
-import { createStyles,
-	Grid,
+import {
+	createStyles,
+	Grid, List,
+	ListItemSecondaryAction,
 	TextField,
 	Theme,
-	Typography
+	Typography,
+	IconButton,
+	ListItem,
 } from "@material-ui/core";
 import AuthenticatedPage from "../AuthenticatedPage";
 import { makeStyles } from '@material-ui/core/styles';
 import NumberFormat from 'react-number-format';
 import { calculateBaseCLTContract } from "../../../clients/publicApiClient";
 import Dinero, { Currency } from "dinero.js";
+import SyncIcon from '@material-ui/icons/Sync';
+import DeleteIcon from '@material-ui/icons/Delete';
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
 	root: {
@@ -43,6 +49,7 @@ function NumberFormatCustom(props: NumberFormatCustomProps) {
 					},
 				});
 			}}
+			thousandSeparator="."
 			decimalSeparator=","
 			decimalScale={2}
 			isNumericString
@@ -58,46 +65,65 @@ interface State {
 	netSalary: string;
 }
 
+interface Amount {
+	amount: number;
+	currency: Currency;
+}
+
+interface Discount {
+	amount: Amount;
+	discountType: string;
+}
+
+interface Income {
+	amount: Amount;
+	discounts: Discount[];
+}
+
 interface Contract {
-	netSalary: {
-		amount: {
-			amount: number;
-			currency: Currency;
-		}
-	};
+	netSalary: Income;
+	thirteenthSalary: Income;
+	thirteenthSalaryAdvance: Income;
 }
 
 const NewIncome: React.FC<RouteComponentProps> = () => {
 	const classes = useStyles();
 	const [values, setValues] = React.useState<State>({
-		grossSalary: '1100000',
-		dependentsQuantity: 1,
+		grossSalary: '0',
+		dependentsQuantity: 0,
 		deductions: '0',
 		netSalary: '0',
 	});
+
+	const defaultIncome = {
+		amount: {
+			amount: 0,
+			currency: 'BRL' as Currency,
+		},
+		discounts: [],
+	};
 	const [ contract, setContract ] = React.useState<Contract>({
-		netSalary: {
-			amount: {
-				amount: 0,
-				currency: 'BRL',
-			},
-		}
+		netSalary: defaultIncome,
+		thirteenthSalary: defaultIncome,
+		thirteenthSalaryAdvance: defaultIncome,
 	});
 
-	useEffect( () => {
+	const updateBaseCLTContract = () => {
 		calculateBaseCLTContract(
 			parseInt(values.grossSalary),
-			values.dependentsQuantity,
+			parseInt(values.dependentsQuantity.toString()),
 			parseInt(values.deductions),
 		).then(response => {
 			setContract(response)
 		});
-	});
+	};
 
 	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		const value = event.target.value.replace('.', '') || 0;
+
 		setValues({
 			...values,
-			[event.target.name]: event.target.value,
+			[event.target.name]: value,
 		});
 	};
 
@@ -127,7 +153,7 @@ const NewIncome: React.FC<RouteComponentProps> = () => {
 							label="Salário Bruto"
 							value={
 								Dinero({ amount: parseInt(values.grossSalary) })
-									.toRoundedUnit(2).toFixed(2)
+								.toRoundedUnit(2).toFixed(2)
 							}
 							onChange={handleChange}
 							name="grossSalary"
@@ -160,9 +186,21 @@ const NewIncome: React.FC<RouteComponentProps> = () => {
 						/>
 					</Grid>
 					<Grid item xs={12}>
+						<IconButton
+							onClick={updateBaseCLTContract}
+							size={"small"}
+							color="primary"
+							aria-label="Atualizar valores">
+							<SyncIcon /> Recalcular Valores
+						</IconButton>
+					</Grid>
+					<Grid item xs={12}>
+						<Typography variant={"subtitle2"}>Salário Líquido</Typography>
+					</Grid>
+					<Grid item xs={12}>
 						<TextField
 							id="outlined-search"
-							label="Salário Liquido"
+							label="Salário Líquido"
 							variant="outlined"
 							value={contract ?
 								Dinero(contract.netSalary.amount)
@@ -174,6 +212,108 @@ const NewIncome: React.FC<RouteComponentProps> = () => {
 								inputComponent: NumberFormatCustom as any,
 							}}
 						/>
+					</Grid>
+					<Grid item xs={2}>
+						<Typography variant={"caption"}>Descontos</Typography>
+						<List>
+							{ contract ?
+								contract.netSalary.discounts.map(discount => {
+									return (
+										<ListItem>
+											<TextField
+												label={discount.discountType}
+												variant="outlined"
+												value={contract ?
+													Dinero(discount.amount)
+														.toRoundedUnit(2).toFixed(2) :
+													'0' }
+												name="discount"
+												onChange={handleChange}
+												InputProps={{
+													inputComponent: NumberFormatCustom as any,
+												}}
+											/>
+											<ListItemSecondaryAction>
+												<IconButton edge="end" aria-label="delete">
+													<DeleteIcon />
+												</IconButton>
+											</ListItemSecondaryAction>
+										</ListItem>
+									);
+								})
+								: null
+							}
+						</List>
+					</Grid>
+					<Grid item xs={12}>
+						<Typography variant={"subtitle2"}>Adiantamento do 13º Salário</Typography>
+					</Grid>
+					<Grid item xs={12}>
+						<TextField
+							id="outlined-search"
+							label="Adiantamento do 13º"
+							variant="outlined"
+							value={contract ?
+								Dinero(contract.thirteenthSalaryAdvance.amount)
+									.toRoundedUnit(2).toFixed(2) :
+								'0' }
+							name="thirteenthSalaryAdvance"
+							onChange={handleChange}
+							InputProps={{
+								inputComponent: NumberFormatCustom as any,
+							}}
+						/>
+					</Grid>
+					<Grid item xs={12}>
+						<Typography variant={"subtitle2"}>13º Salário</Typography>
+					</Grid>
+					<Grid item xs={12}>
+						<TextField
+							id="outlined-search"
+							label="Adiantamento do 13º"
+							variant="outlined"
+							value={contract ?
+								Dinero(contract.thirteenthSalary.amount)
+									.toRoundedUnit(2).toFixed(2) :
+								'0' }
+							name="thirteenthSalaryAdvance"
+							onChange={handleChange}
+							InputProps={{
+								inputComponent: NumberFormatCustom as any,
+							}}
+						/>
+					</Grid>
+					<Grid item xs={2}>
+						<Typography variant={"caption"}>Descontos</Typography>
+						<List>
+							{ contract ?
+								contract.thirteenthSalary.discounts.map(discount => {
+									return (
+										<ListItem>
+											<TextField
+												label={discount.discountType}
+												variant="outlined"
+												value={contract ?
+													Dinero(discount.amount)
+														.toRoundedUnit(2).toFixed(2) :
+													'0' }
+												name="discount"
+												onChange={handleChange}
+												InputProps={{
+													inputComponent: NumberFormatCustom as any,
+												}}
+											/>
+											<ListItemSecondaryAction>
+												<IconButton edge="end" aria-label="delete">
+													<DeleteIcon />
+												</IconButton>
+											</ListItemSecondaryAction>
+										</ListItem>
+									);
+								})
+								: null
+							}
+						</List>
 					</Grid>
 				</Grid>
 			</form>
