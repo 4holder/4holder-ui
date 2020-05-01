@@ -5,7 +5,7 @@ import IncomeForm from './IncomeForm';
 test('render a income edit box with proper parameters', () => {
   const onChangeMock = jest.fn();;
   const formTitle = 'Salário Líquido';
-  const fieldKey = "netSalary";
+  const fieldKey = 0;
 
   const {
     getAllByText,
@@ -14,18 +14,30 @@ test('render a income edit box with proper parameters', () => {
     <IncomeForm
       fieldKey={fieldKey}
       handleChange={onChangeMock}
-      incomeName={formTitle}
-      incomeValue={'10000'}
-      discounts={[
-        {
-          amount: '500',
-          discountType: 'INSS',
+      income={{
+        name: formTitle,
+        amount: {
+          amount: 10000,
+          currency: 'BRL',
         },
-        {
-          amount: '1000',
-          discountType: 'IRRF',
-        },
-      ]}
+        discounts: [
+          {
+            amount: {
+              amount: 500,
+              currency: 'BRL',
+            },
+            discountType: 'INSS',
+          },
+          {
+            amount: {
+              amount: 1000,
+              currency: 'BRL',
+            },
+            discountType: 'IRRF',
+          },
+        ]
+      }}
+
     />
   );
 
@@ -36,7 +48,7 @@ test('render a income edit box with proper parameters', () => {
 
   expect(titleEl.length).toBeGreaterThan(0);
   expect(netSalaryInputEl).toBeInTheDocument();
-  expect(netSalaryInputEl.getAttribute('name')).toEqual(fieldKey);
+  expect(netSalaryInputEl.getAttribute('name')).toEqual(fieldKey.toString());
   expect(netSalaryInputEl.getAttribute('value')).toEqual("R$100,00");
   const inssFieldName = `${fieldKey}_discount_0`;
   expect(inssInputEl.getAttribute('name')).toEqual(inssFieldName);
@@ -48,7 +60,7 @@ test('render a income edit box with proper parameters', () => {
   fireEvent.change(netSalaryInputEl, { target: { value: "R$99,99" } });
   expect(onChangeMock).toHaveBeenCalledWith({
     "target": {
-      "name": fieldKey,
+      "name": fieldKey.toString(),
       "value": "99.99",
     },
   });

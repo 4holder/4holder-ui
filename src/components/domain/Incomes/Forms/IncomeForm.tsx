@@ -2,7 +2,8 @@ import {
   createStyles,
   FormControl,
   Grid,
-  IconButton, Input, InputBase, InputLabel,
+  InputBase,
+  InputLabel,
   List,
   ListItem,
   MenuItem,
@@ -13,20 +14,16 @@ import {
 import Dinero from "dinero.js";
 import MoneyFormat from "../../../common/NumberFormat/MoneyFormat";
 import React from "react";
+import { Income } from "../NewIncome";
 
-const centsToCurrency = (amount: string) =>
-  Dinero({amount: parseInt(amount), currency: "BRL"})
+const centsToCurrency = (amount: number) =>
+  Dinero({amount: amount, currency: "BRL"})
     .toRoundedUnit(2)
     .toFixed(2);
 
 interface IncomeFormProps {
-  fieldKey: string;
-  incomeName: string;
-  incomeValue: string;
-  discounts: {
-    amount: string;
-    discountType: string;
-  }[],
+  fieldKey: number;
+  income: Income;
   handleChange: React.ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>;
 }
 
@@ -70,27 +67,25 @@ const BootstrapInput = withStyles((theme: Theme) =>
 
 const IncomeForm: React.FC<IncomeFormProps> = ({
   fieldKey,
-  incomeName,
-  incomeValue,
-  discounts,
+  income,
   handleChange,
 }: IncomeFormProps) => {
-  const value = centsToCurrency(incomeValue);
-  const occurrenceDayLabel = `${incomeName} dia de entrada`;
+  const value = centsToCurrency(income.amount.amount);
+  const occurrenceDayLabel = `Dia`;
   const occurrenceDayFieldName = `occurrence_${fieldKey}`;
 
   return (
     <Grid container>
       <Grid item xs={12}>
-        <Typography variant={"subtitle2"}>{incomeName}</Typography>
+        <Typography variant={"subtitle2"}>{income.name}</Typography>
       </Grid>
       <Grid item xs={12}>
         <TextField
-          label={incomeName}
+          label={income.name}
           variant="outlined"
-          placeholder={incomeName}
+          placeholder={income.name}
           value={value}
-          name={fieldKey}
+          name={fieldKey.toString()}
           onChange={handleChange}
           InputProps={{
             inputComponent: MoneyFormat as any,
@@ -129,17 +124,17 @@ const IncomeForm: React.FC<IncomeFormProps> = ({
           </Select>
         </FormControl>
       </Grid>
-      <Grid hidden={!discounts.length} item xs={6}>
-        <Typography variant={"caption"}>Descontos em {incomeName}</Typography>
+      <Grid hidden={!income.discounts.length} item xs={6}>
+        <Typography variant={"caption"}>Descontos</Typography>
         <List>
-          { discounts.map((discount, index) => {
+          { income.discounts.map((discount, index) => {
               return (
                 <ListItem key={discount.discountType}>
                   <TextField
                     label={discount.discountType}
                     placeholder={discount.discountType}
                     variant="outlined"
-                    value={centsToCurrency(discount.amount)}
+                    value={centsToCurrency(discount.amount.amount)}
                     name={`${fieldKey}_discount_${index}`}
                     onChange={handleChange}
                     InputProps={{
