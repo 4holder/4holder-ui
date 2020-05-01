@@ -67,6 +67,10 @@ query(
     netSalary {
       name
       incomeType
+      occurrences {
+        day
+        months
+      }
       amount {
         amount
       }
@@ -80,6 +84,10 @@ query(
     thirteenthSalary {
       name
       incomeType
+      occurrences {
+        day
+        months
+      }
       amount {
         amount
       }
@@ -93,6 +101,10 @@ query(
     thirteenthSalaryAdvance {
       name
       incomeType
+      occurrences {
+        day
+        months
+      }
       amount {
         amount
       }

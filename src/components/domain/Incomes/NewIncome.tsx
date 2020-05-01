@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import { RouteComponentProps } from '@reach/router';
 import {
 	createStyles,
@@ -6,13 +6,11 @@ import {
 	TextField,
 	Theme,
 	Typography,
-	IconButton,
 } from "@material-ui/core";
 import AuthenticatedPage from "../AuthenticatedPage";
 import { makeStyles } from '@material-ui/core/styles';
 import { calculateBaseCLTContract } from "../../../clients/publicApiClient";
 import Dinero, { Currency } from "dinero.js";
-import SyncIcon from '@material-ui/icons/Sync';
 import MoneyFormat from "../../common/NumberFormat/MoneyFormat";
 import IncomeForm from "./Forms/IncomeForm";
 
@@ -27,9 +25,6 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 );
 
 interface FormValues {
-	grossSalary: string;
-	dependentsQuantity: number;
-	deductions: string;
 	incomes: Income[];
 }
 
@@ -45,6 +40,10 @@ export interface Discount {
 
 export interface Income {
 	name: string;
+	occurrences: {
+		day: number;
+		months: number[];
+	};
 	amount: Amount;
 	discounts: Discount[];
 }
@@ -55,24 +54,35 @@ export interface Contract {
 	thirteenthSalaryAdvance: Income;
 }
 
+export interface CLTBaseForm {
+	grossSalary: string;
+	dependentsQuantity: number;
+	deductions: string;
+}
+
+function sanitizeValue(value: string) {
+	return parseInt(value.replace('.', ''));
+}
+
 const NewIncome: React.FC<RouteComponentProps> = () => {
 	const classes = useStyles();
-	const [formValues, setFormValues] = React.useState<FormValues>({
+	const [ cltBaseFormValues, setCLTBaseFormValues] = useState<CLTBaseForm>({
 		grossSalary: '200000',
 		dependentsQuantity: 0,
 		deductions: '0',
+	});
+
+	const [formValues, setFormValues] = useState<FormValues>({
 		incomes: [],
 	});
 
-	useEffect(() => updateBaseCLTContract());
-
 	const updateBaseCLTContract = () => {
 		calculateBaseCLTContract(
-			parseInt(formValues.grossSalary),
-			parseInt(formValues.dependentsQuantity.toString()),
-			parseInt(formValues.deductions),
+			parseInt(cltBaseFormValues.grossSalary),
+			parseInt(cltBaseFormValues.dependentsQuantity.toString()),
+			parseInt(cltBaseFormValues.deductions),
 		).then((response: Contract) => {
-
+			console.log(response.netSalary.occurrences);
 			setFormValues({
 				...formValues,
 				incomes: [
@@ -84,17 +94,20 @@ const NewIncome: React.FC<RouteComponentProps> = () => {
 		});
 	};
 
-	const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		const value = event.target.value.replace('.', '') || 0;
+	useEffect(() => updateBaseCLTContract(),
+		[cltBaseFormValues]);
 
-		setFormValues({
-			...formValues,
+	const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		const value = sanitizeValue(event.target.value) || 0;
+
+		setCLTBaseFormValues({
+			...cltBaseFormValues,
 			[event.target.name]: value,
 		});
 	};
 
-	const handleIncomeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		const value = parseInt(event.target.value.replace('.', '')) || 0;
+	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		const value = sanitizeValue(event.target.value) || 0;
 		const index = parseInt(event.target.name);
 
 		const newIncome = {
@@ -106,7 +119,6 @@ const NewIncome: React.FC<RouteComponentProps> = () => {
 		} as Income;
 
 		const newIncomes = formValues.incomes.map((income, i) => i === index? newIncome : income);
-
 
 		const newFormValues = {
 			...formValues,
@@ -141,7 +153,7 @@ const NewIncome: React.FC<RouteComponentProps> = () => {
 						<TextField
 							label="Salário Bruto"
 							value={
-								Dinero({ amount: parseInt(formValues.grossSalary) })
+								Dinero({ amount: parseInt(cltBaseFormValues.grossSalary) })
 								.toRoundedUnit(2).toFixed(2)
 							}
 							onChange={handleAmountChange}
@@ -156,7 +168,7 @@ const NewIncome: React.FC<RouteComponentProps> = () => {
 							label="Dependentes"
 							type="number"
 							variant="outlined"
-							value={formValues.dependentsQuantity}
+							value={cltBaseFormValues.dependentsQuantity}
 							name="dependentsQuantity"
 							onChange={handleAmountChange}
 						/>
@@ -165,7 +177,7 @@ const NewIncome: React.FC<RouteComponentProps> = () => {
 							label="Deduções"
 							variant="outlined"
 							value={
-								Dinero({ amount: parseInt(formValues.deductions) })
+								Dinero({ amount: parseInt(cltBaseFormValues.deductions) })
 									.toRoundedUnit(2).toFixed(2)}
 							name="deductions"
 							onChange={handleAmountChange}
@@ -174,20 +186,11 @@ const NewIncome: React.FC<RouteComponentProps> = () => {
 							}}
 						/>
 					</Grid>
-					<Grid item xs={12}>
-						<IconButton
-							onClick={updateBaseCLTContract}
-							size={"small"}
-							color="primary"
-							aria-label="Atualizar valores">
-							<SyncIcon /> Recalcular Valores
-						</IconButton>
-					</Grid>
 
 					{ formValues.incomes.map((income, i) => (
 						<IncomeForm fieldKey={i}
 												income={income}
-												handleChange={handleIncomeChange}
+												handleChange={handleChange}
 						/>
 						))}
 				</Grid>

@@ -95,7 +95,7 @@ const IncomeForm: React.FC<IncomeFormProps> = ({
           label={occurrenceDayLabel}
           variant="outlined"
           placeholder={occurrenceDayLabel}
-          value={5}
+          value={income.occurrences.day}
           name={occurrenceDayFieldName}
           onChange={handleChange}
         />
@@ -105,7 +105,7 @@ const IncomeForm: React.FC<IncomeFormProps> = ({
             labelId="menu-item"
             variant="outlined"
             multiple
-            value={[""]}
+            value={income.occurrences.months}
             input={<BootstrapInput />}
           >
             <MenuItem disabled value="">Selecione os Meses</MenuItem>
