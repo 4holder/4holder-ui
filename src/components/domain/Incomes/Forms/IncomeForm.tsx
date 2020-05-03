@@ -1,3 +1,6 @@
+import React, {
+  useState,
+} from "react";
 import {
   createStyles,
   FormControl,
@@ -5,26 +8,20 @@ import {
   InputBase,
   InputLabel,
   List,
-  ListItem,
   MenuItem,
   Select,
   TextField, Theme,
   Typography, withStyles
 } from "@material-ui/core";
-import Dinero from "dinero.js";
 import MoneyFormat from "../../../common/NumberFormat/MoneyFormat";
-import React from "react";
 import { Income } from "../NewIncome";
-
-const centsToCurrency = (amount: number) =>
-  Dinero({amount: amount, currency: "BRL"})
-    .toRoundedUnit(2)
-    .toFixed(2);
+import {centsToCurrency, sanitizeValue} from "../utils";
+import IncomeDiscountForm from "./IncomeDiscountForm";
 
 interface IncomeFormProps {
   fieldKey: number;
   income: Income;
-  handleChange: React.ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>;
+  handleChange: (i: Income) => void;
 }
 
 const BootstrapInput = withStyles((theme: Theme) =>
@@ -65,14 +62,27 @@ const BootstrapInput = withStyles((theme: Theme) =>
   }),
 )(InputBase);
 
+interface State {
+  amount: number;
+  occurrencesDay: number;
+  occurrencesMonths: number[];
+}
+
 const IncomeForm: React.FC<IncomeFormProps> = ({
   fieldKey,
   income,
   handleChange,
 }: IncomeFormProps) => {
-  const value = centsToCurrency(income.amount.amount);
   const occurrenceDayLabel = `Dia`;
-  const occurrenceDayFieldName = `occurrence_${fieldKey}`;
+
+  const [
+    incomeForm,
+    setIncome,
+  ] = useState<State>({
+    amount: income.amount.amount,
+    occurrencesDay: income.occurrences.day,
+    occurrencesMonths: income.occurrences.months,
+  });
 
   return (
     <Grid container>
@@ -84,9 +94,24 @@ const IncomeForm: React.FC<IncomeFormProps> = ({
           label={income.name}
           variant="outlined"
           placeholder={income.name}
-          value={value}
-          name={fieldKey.toString()}
-          onChange={handleChange}
+          value={centsToCurrency(incomeForm.amount)}
+          name="amount"
+          onChange={event => {
+            const newAmount = sanitizeValue(event.target.value);
+            const newIncome = {
+              ...incomeForm,
+              amount: newAmount,
+            };
+
+            handleChange({
+              ...income,
+              amount: {
+                ...income.amount,
+                amount: newAmount,
+              },
+            });
+            setIncome(newIncome);
+          }}
           InputProps={{
             inputComponent: MoneyFormat as any,
           }}
@@ -94,33 +119,66 @@ const IncomeForm: React.FC<IncomeFormProps> = ({
         <TextField
           label={occurrenceDayLabel}
           variant="outlined"
+          type="number"
           placeholder={occurrenceDayLabel}
-          value={income.occurrences.day}
-          name={occurrenceDayFieldName}
-          onChange={handleChange}
+          value={incomeForm.occurrencesDay}
+          onChange={event => {
+            const newOccurrencesDay = parseInt(event.target.value);
+            const newIncome = {
+              ...incomeForm,
+              occurrencesDay: newOccurrencesDay,
+            };
+
+            handleChange({
+              ...income,
+              occurrences: {
+                ...income.occurrences,
+                day: newOccurrencesDay,
+              },
+            });
+            setIncome(newIncome);
+          }}
+          name="occurrencesDay"
         />
         <FormControl>
-          <InputLabel id="menu-item">Mês</InputLabel>
+          <InputLabel id={`occurrences-months-${fieldKey}`}>Meses</InputLabel>
           <Select
-            labelId="menu-item"
+            data-testid={`occurrences-months-${fieldKey}`}
+            labelId={`occurrences-months-${fieldKey}`}
             variant="outlined"
             multiple
-            value={income.occurrences.months}
+            value={incomeForm.occurrencesMonths}
             input={<BootstrapInput />}
+            onChange={event => {
+              const newOccurrencesMonths = event.target.value as number[];
+              const newIncome = {
+                ...incomeForm,
+                occurrencesMonths: newOccurrencesMonths,
+              };
+
+              handleChange({
+                ...income,
+                occurrences: {
+                  ...income.occurrences,
+                  months: newOccurrencesMonths,
+                },
+              });
+              setIncome(newIncome);
+            }}
           >
             <MenuItem disabled value="">Selecione os Meses</MenuItem>
-            <MenuItem value={"1"}>Janeiro</MenuItem>
-            <MenuItem value={"2"}>Fevereiro</MenuItem>
-            <MenuItem value={"3"}>Março</MenuItem>
-            <MenuItem value={"4"}>Abril</MenuItem>
-            <MenuItem value={"5"}>Maio</MenuItem>
-            <MenuItem value={"6"}>Junho</MenuItem>
-            <MenuItem value={"7"}>Julho</MenuItem>
-            <MenuItem value={"8"}>Agosto</MenuItem>
-            <MenuItem value={"9"}>Setembro</MenuItem>
-            <MenuItem value={"10"}>Outubro</MenuItem>
-            <MenuItem value={"11"}>Novembro</MenuItem>
-            <MenuItem value={"12"}>Dezembro</MenuItem>
+            <MenuItem value={1}>Janeiro</MenuItem>
+            <MenuItem value={2}>Fevereiro</MenuItem>
+            <MenuItem value={3}>Março</MenuItem>
+            <MenuItem value={4}>Abril</MenuItem>
+            <MenuItem value={5}>Maio</MenuItem>
+            <MenuItem value={6}>Junho</MenuItem>
+            <MenuItem value={7}>Julho</MenuItem>
+            <MenuItem value={8}>Agosto</MenuItem>
+            <MenuItem value={9}>Setembro</MenuItem>
+            <MenuItem value={10}>Outubro</MenuItem>
+            <MenuItem value={11}>Novembro</MenuItem>
+            <MenuItem value={12}>Dezembro</MenuItem>
           </Select>
         </FormControl>
       </Grid>
@@ -129,19 +187,25 @@ const IncomeForm: React.FC<IncomeFormProps> = ({
         <List>
           { income.discounts.map((discount, index) => {
               return (
-                <ListItem key={discount.discountType}>
-                  <TextField
-                    label={discount.discountType}
-                    placeholder={discount.discountType}
-                    variant="outlined"
-                    value={centsToCurrency(discount.amount.amount)}
-                    name={`${fieldKey}_discount_${index}`}
-                    onChange={handleChange}
-                    InputProps={{
-                      inputComponent: MoneyFormat as any,
-                    }}
-                  />
-                </ListItem>
+                <IncomeDiscountForm key={index}
+                                    fieldKey={index}
+                                    discount={discount}
+                                    handleChange={(index, discount) => {
+                                      // TODO:
+                                      //  - Create a state for income discounts
+                                      //  - Update the discount triggered in this event
+                                      //  - Call the callback using the new Income
+                                      console.log(index);
+                                      console.log(discount);
+                                    }}
+                                    handleRemove={(index) => {
+                                      // TODO:
+                                      //  - Create a state for income discounts
+                                      //  - Remove the discount triggered in this event
+                                      //  - Call the callback using the new Income
+                                      console.log(index);
+                                    }}
+                />
               );
             })
           }

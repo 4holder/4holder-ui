@@ -13,6 +13,8 @@ import { calculateBaseCLTContract } from "../../../clients/publicApiClient";
 import Dinero, { Currency } from "dinero.js";
 import MoneyFormat from "../../common/NumberFormat/MoneyFormat";
 import IncomeForm from "./Forms/IncomeForm";
+import {Amount, Discount} from "./types";
+import {sanitizeValue} from "./utils";
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
 	root: {
@@ -26,16 +28,6 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 
 interface FormValues {
 	incomes: Income[];
-}
-
-export interface Amount {
-	amount: number;
-	currency: Currency;
-}
-
-export interface Discount {
-	amount: Amount;
-	discountType: string;
 }
 
 export interface Income {
@@ -60,10 +52,6 @@ export interface CLTBaseForm {
 	deductions: string;
 }
 
-function sanitizeValue(value: string) {
-	return parseInt(value.replace('.', ''));
-}
-
 const NewIncome: React.FC<RouteComponentProps> = () => {
 	const classes = useStyles();
 	const [ cltBaseFormValues, setCLTBaseFormValues] = useState<CLTBaseForm>({
@@ -82,7 +70,6 @@ const NewIncome: React.FC<RouteComponentProps> = () => {
 			parseInt(cltBaseFormValues.dependentsQuantity.toString()),
 			parseInt(cltBaseFormValues.deductions),
 		).then((response: Contract) => {
-			console.log(response.netSalary.occurrences);
 			setFormValues({
 				...formValues,
 				incomes: [
@@ -94,10 +81,9 @@ const NewIncome: React.FC<RouteComponentProps> = () => {
 		});
 	};
 
-	useEffect(() => updateBaseCLTContract(),
-		[cltBaseFormValues]);
+	useEffect(() => updateBaseCLTContract(), [cltBaseFormValues]);
 
-	const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+	const handleBaseCLTChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const value = sanitizeValue(event.target.value) || 0;
 
 		setCLTBaseFormValues({
@@ -106,19 +92,8 @@ const NewIncome: React.FC<RouteComponentProps> = () => {
 		});
 	};
 
-	const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		const value = sanitizeValue(event.target.value) || 0;
-		const index = parseInt(event.target.name);
-
-		const newIncome = {
-			...formValues.incomes[index],
-			amount: {
-				...formValues.incomes[index].amount,
-				amount: value,
-			},
-		} as Income;
-
-		const newIncomes = formValues.incomes.map((income, i) => i === index? newIncome : income);
+	function updateIncome(newIncome: Income, index: number) {
+		const newIncomes = formValues.incomes.map((income, i) => i === index ? newIncome : income);
 
 		const newFormValues = {
 			...formValues,
@@ -126,6 +101,51 @@ const NewIncome: React.FC<RouteComponentProps> = () => {
 		} as FormValues;
 
 		setFormValues(newFormValues);
+	}
+
+	const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		const value = sanitizeValue(event.target.value) || 0;
+		const index = parseInt(event.target.name);
+
+		const updatedIncome = {
+			...formValues.incomes[index],
+			amount: {
+				...formValues.incomes[index].amount,
+				amount: value,
+			},
+		} as Income;
+
+		updateIncome(updatedIncome, index);
+	};
+
+	const handleOccurrencesDayChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		const day = parseInt(event.target.value) || 0;
+		const index = parseInt(event.target.name.replace(/[a-zA-Z_]/g, ''));
+
+		const updatedIncome = {
+			...formValues.incomes[index],
+			occurrences: {
+				...formValues.incomes[index].occurrences,
+				day: day,
+			},
+		} as Income;
+
+		updateIncome(updatedIncome, index);
+	};
+
+	const handleOccurrencesMonthsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		const day = parseInt(event.target.value) || 0;
+		const index = parseInt(event.target.name.replace(/[a-zA-Z_]/g, ''));
+
+		const updatedIncome = {
+			...formValues.incomes[index],
+			occurrences: {
+				...formValues.incomes[index].occurrences,
+				day: day,
+			},
+		} as Income;
+
+		updateIncome(updatedIncome, index);
 	};
 
 	return (
@@ -156,7 +176,7 @@ const NewIncome: React.FC<RouteComponentProps> = () => {
 								Dinero({ amount: parseInt(cltBaseFormValues.grossSalary) })
 								.toRoundedUnit(2).toFixed(2)
 							}
-							onChange={handleAmountChange}
+							onChange={handleBaseCLTChange}
 							name="grossSalary"
 							InputProps={{
 								inputComponent: MoneyFormat as any,
@@ -170,7 +190,7 @@ const NewIncome: React.FC<RouteComponentProps> = () => {
 							variant="outlined"
 							value={cltBaseFormValues.dependentsQuantity}
 							name="dependentsQuantity"
-							onChange={handleAmountChange}
+							onChange={handleBaseCLTChange}
 						/>
 						<TextField
 							id="outlined-search"
@@ -180,7 +200,7 @@ const NewIncome: React.FC<RouteComponentProps> = () => {
 								Dinero({ amount: parseInt(cltBaseFormValues.deductions) })
 									.toRoundedUnit(2).toFixed(2)}
 							name="deductions"
-							onChange={handleAmountChange}
+							onChange={handleBaseCLTChange}
 							InputProps={{
 								inputComponent: MoneyFormat as any,
 							}}
@@ -188,9 +208,10 @@ const NewIncome: React.FC<RouteComponentProps> = () => {
 					</Grid>
 
 					{ formValues.incomes.map((income, i) => (
-						<IncomeForm fieldKey={i}
+						<IncomeForm key={i}
+												fieldKey={i}
 												income={income}
-												handleChange={handleChange}
+												handleChange={() => null}
 						/>
 						))}
 				</Grid>
