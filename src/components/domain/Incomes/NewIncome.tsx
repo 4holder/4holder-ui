@@ -11,10 +11,10 @@ import {
 import AuthenticatedPage from "../AuthenticatedPage";
 import { makeStyles } from '@material-ui/core/styles';
 import { calculateBaseCLTContract } from "../../../clients/publicApiClient";
-import Dinero  from "dinero.js";
+import Dinero, {Currency} from "dinero.js";
 import MoneyFormat from "../../common/NumberFormat/MoneyFormat";
 import IncomeForm from "./Forms/IncomeForm";
-import {Amount, Income} from "./types";
+import {Amount, Discount, Income} from "./types";
 import { sanitizeValue } from "./utils";
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
@@ -161,7 +161,24 @@ const NewIncome: React.FC<RouteComponentProps> = () => {
 										}}
 										onClick={e => {
 											e.preventDefault();
-											console.log('Adicionar provento..');
+											const newIncome = {
+												name: 'Other',
+												incomeType: 'OTHER',
+												occurrences: {
+													day: 5,
+													months: [1],
+												},
+												amount: {
+													amount: 0,
+													currency: 'BRL' as Currency,
+												},
+												discounts: [] as Discount[],
+											};
+
+											setFormValues({
+												...formValues,
+												incomes: [...formValues.incomes, ...[newIncome]],
+											});
 										}}>
 							Adicionar Provento
 						</Button>
@@ -172,7 +189,11 @@ const NewIncome: React.FC<RouteComponentProps> = () => {
 										}}
 										onClick={e => {
 											e.preventDefault();
-											console.log('Remover último provento..');
+											const lastIncomeIndex = formValues.incomes.length-1;
+											setFormValues({
+												...formValues,
+												incomes: formValues.incomes.filter((_, i) => i !== lastIncomeIndex),
+											});
 										}}
 						>
 							Remover Último Provento
