@@ -64,41 +64,7 @@ query(
     grossSalary {
       amount
     }
-    netSalary {
-      name
-      incomeType
-      occurrences {
-        day
-        months
-      }
-      amount {
-        amount
-      }
-      discounts {
-        discountType
-        amount {
-          amount
-        }
-      }
-    }
-    thirteenthSalary {
-      name
-      incomeType
-      occurrences {
-        day
-        months
-      }
-      amount {
-        amount
-      }
-      discounts {
-        discountType
-        amount {
-          amount
-        }
-      }
-    }
-    thirteenthSalaryAdvance {
+    incomes {
       name
       incomeType
       occurrences {

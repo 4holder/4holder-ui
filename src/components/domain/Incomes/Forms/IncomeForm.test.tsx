@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import IncomeForm from './IncomeForm';
-import { Income } from "../NewIncome";
+import { Income } from "../types";
 
 test('render a income edit box with proper parameters', () => {
   const onChangeMock = jest.fn();;
@@ -9,6 +9,7 @@ test('render a income edit box with proper parameters', () => {
 
   const income = {
     name: 'Salary',
+    incomeType: 'SALARY',
     occurrences: {
       day: 15,
       months: [1,2,3]
@@ -38,7 +39,6 @@ test('render a income edit box with proper parameters', () => {
   const {
     getAllByText,
     getAllByPlaceholderText,
-    getByTestId,
   } = render(
     <IncomeForm
       fieldKey={fieldKey}
@@ -48,14 +48,14 @@ test('render a income edit box with proper parameters', () => {
   );
 
   const titleEl = getAllByText(income.name);
-  const netSalaryInputEl = getAllByPlaceholderText(income.name)[0];
+  const netSalaryInputEl = getAllByPlaceholderText('Valor')[0];
 
   expect(titleEl.length).toBeGreaterThan(0);
   expect(netSalaryInputEl).toBeInTheDocument();
   expect(netSalaryInputEl.getAttribute('value')).toEqual("R$100,00");
 
   fireEvent.change(netSalaryInputEl, { target: { value: "R$99,99" } });
-  expect(onChangeMock).toBeCalledWith({
+  expect(onChangeMock).toBeCalledWith(0, {
     ...income,
     amount: {
       ...income.amount,
@@ -70,7 +70,7 @@ test('render a income edit box with proper parameters', () => {
   expect(occurrencesDayInputEl.getAttribute('value')).toEqual("15");
 
   fireEvent.change(occurrencesDayInputEl, { target: { value: "20" } });
-  expect(onChangeMock).toBeCalledWith({
+  expect(onChangeMock).toBeCalledWith(0, {
     ...income,
     occurrences: {
       ...income.occurrences,

@@ -1,16 +1,15 @@
 import React, { useState } from "react";
-import DeleteIcon from '@material-ui/icons/Delete';
+import { FormControl, InputLabel, MenuItem, Select, TextField } from "@material-ui/core";
 import { Discount } from "../types";
 import MoneyFormat from "../../../common/NumberFormat/MoneyFormat";
-import {Button, Fab, TextField} from "@material-ui/core";
-import {centsToCurrency, sanitizeValue} from "../utils";
-import index from "../../../common/NumberFormat";
+import { centsToCurrency, sanitizeValue } from "../utils";
+import BootstrapInput from "./SelectBootstrap";
 
 interface IncomeDiscountFormProps {
   fieldKey: number;
   discount: Discount;
   handleChange: (index: number, discount: Discount) => void;
-  handleRemove: (index: number) => void;
+  handleRemove?: (index: number) => void;
 }
 
 interface State {
@@ -23,7 +22,6 @@ const IncomeDiscountForm: React.FC<IncomeDiscountFormProps> = ({
   fieldKey,
   discount,
   handleChange,
-  handleRemove,
 }: IncomeDiscountFormProps) => {
   const [ state, setState ] = useState<State>({
     fieldKey,
@@ -33,9 +31,43 @@ const IncomeDiscountForm: React.FC<IncomeDiscountFormProps> = ({
 
   return (
     <div>
+      <FormControl>
+        <InputLabel id={`discount-type-${fieldKey}`}>Tipo</InputLabel>
+        <Select
+          data-testid={`discount-type-${fieldKey}`}
+          labelId={`discount-type-${fieldKey}`}
+          variant="outlined"
+          value={state.discountType}
+          input={<BootstrapInput />}
+          onChange={e => {
+            const discountType = e.target.value as string;
+
+            handleChange(fieldKey, {
+              ...discount,
+              amount: {
+                ...discount.amount,
+                discountType: discountType,
+              }
+            } as Discount);
+
+            setState({
+              ...state,
+              discountType: discountType,
+            });
+          }}
+        >
+          <MenuItem disabled value="">Tipo de Desconto</MenuItem>
+          <MenuItem value="INSS">INSS</MenuItem>
+          <MenuItem value="IRRF">IRRF</MenuItem>
+          <MenuItem value="HEALTH_CARE">Plano de Saúde</MenuItem>
+          <MenuItem value="MEALS">Alimentção</MenuItem>
+          <MenuItem value="PARKING">Estacionamento</MenuItem>
+          <MenuItem value="OTHER">Outro</MenuItem>
+        </Select>
+      </FormControl>
       <TextField
-        label={state.discountType}
-        placeholder={state.discountType}
+        label="Valor"
+        placeholder="Valor"
         variant="outlined"
         value={centsToCurrency(state.amount)}
         name={`discount_${fieldKey}`}
@@ -59,19 +91,6 @@ const IncomeDiscountForm: React.FC<IncomeDiscountFormProps> = ({
           inputComponent: MoneyFormat as any,
         }}
       />
-      <Fab color={"default"}
-           aria-label="Remove"
-           data-testid={"remove-button"}
-           style={{
-             margin: '8px',
-           }}
-           onClick={e => {
-             e.preventDefault();
-             handleRemove(fieldKey);
-           }}
-      >
-        <DeleteIcon />
-      </Fab>
     </div>);
 };
 

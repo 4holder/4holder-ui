@@ -2,70 +2,34 @@ import React, {
   useState,
 } from "react";
 import {
-  createStyles,
+  Button,
   FormControl,
   Grid,
-  InputBase,
   InputLabel,
   List,
   MenuItem,
   Select,
-  TextField, Theme,
-  Typography, withStyles
+  TextField,
+  Typography,
 } from "@material-ui/core";
 import MoneyFormat from "../../../common/NumberFormat/MoneyFormat";
-import { Income } from "../NewIncome";
 import {centsToCurrency, sanitizeValue} from "../utils";
 import IncomeDiscountForm from "./IncomeDiscountForm";
+import BootstrapInput from "./SelectBootstrap";
+import { Discount, Income } from "../types";
 
 interface IncomeFormProps {
   fieldKey: number;
   income: Income;
-  handleChange: (i: Income) => void;
+  handleChange: (index: number, income: Income) => void;
 }
-
-const BootstrapInput = withStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      'label + &': {
-        marginTop: theme.spacing(3),
-      },
-    },
-    input: {
-      borderRadius: 4,
-      width: '250px',
-      position: 'relative',
-      backgroundColor: theme.palette.background.paper,
-      border: '1px solid #ced4da',
-      fontSize: 16,
-      padding: '10px 26px 10px 12px',
-      transition: theme.transitions.create(['border-color', 'box-shadow']),
-      // Use the system font instead of the default Roboto font.
-      fontFamily: [
-        '-apple-system',
-        'BlinkMacSystemFont',
-        '"Segoe UI"',
-        'Roboto',
-        '"Helvetica Neue"',
-        'Arial',
-        'sans-serif',
-        '"Apple Color Emoji"',
-        '"Segoe UI Emoji"',
-        '"Segoe UI Symbol"',
-      ].join(','),
-      '&:focus': {
-        borderRadius: 4,
-        borderColor: '#80bdff',
-        boxShadow: '0 0 0 0.2rem rgba(0,123,255,.25)',
-      },
-    },
-  }),
-)(InputBase);
 
 interface State {
   amount: number;
+  incomeType: string;
   occurrencesDay: number;
   occurrencesMonths: number[];
+  discounts: Discount[],
 }
 
 const IncomeForm: React.FC<IncomeFormProps> = ({
@@ -76,12 +40,14 @@ const IncomeForm: React.FC<IncomeFormProps> = ({
   const occurrenceDayLabel = `Dia`;
 
   const [
-    incomeForm,
-    setIncome,
+    state,
+    setState,
   ] = useState<State>({
     amount: income.amount.amount,
+    incomeType: income.incomeType,
     occurrencesDay: income.occurrences.day,
     occurrencesMonths: income.occurrences.months,
+    discounts: income.discounts,
   });
 
   return (
@@ -90,27 +56,57 @@ const IncomeForm: React.FC<IncomeFormProps> = ({
         <Typography variant={"subtitle2"}>{income.name}</Typography>
       </Grid>
       <Grid item xs={12}>
+        <FormControl>
+          <InputLabel id={`income-type-${fieldKey}`}>Tipo</InputLabel>
+          <Select
+            data-testid={`income-type-${fieldKey}`}
+            labelId={`income-type-${fieldKey}`}
+            variant="outlined"
+            value={state.incomeType}
+            input={<BootstrapInput />}
+            onChange={e => {
+              const incomeType = e.target.value as string;
+
+              handleChange(fieldKey, {
+                ...income,
+                incomeType,
+              } as Income);
+
+              setState({
+                ...state,
+                incomeType,
+              });
+            }}
+          >
+            <MenuItem disabled value="">Tipo de Provento</MenuItem>
+            <MenuItem value="SALARY">Salário</MenuItem>
+            <MenuItem value="THIRTEENTH_SALARY">Décimo Terceiro</MenuItem>
+            <MenuItem value="THIRTEENTH_SALARY_ADVANCE">Adiantamento Décimo Terceiro</MenuItem>
+            <MenuItem value="PROFIT_SHARING">PLR</MenuItem>
+            <MenuItem value="OTHER">Outro</MenuItem>
+          </Select>
+        </FormControl>
         <TextField
-          label={income.name}
+          label="Valor"
           variant="outlined"
-          placeholder={income.name}
-          value={centsToCurrency(incomeForm.amount)}
+          placeholder="Valor"
+          value={centsToCurrency(state.amount)}
           name="amount"
           onChange={event => {
             const newAmount = sanitizeValue(event.target.value);
             const newIncome = {
-              ...incomeForm,
+              ...state,
               amount: newAmount,
             };
 
-            handleChange({
+            handleChange(fieldKey, {
               ...income,
               amount: {
                 ...income.amount,
                 amount: newAmount,
               },
             });
-            setIncome(newIncome);
+            setState(newIncome);
           }}
           InputProps={{
             inputComponent: MoneyFormat as any,
@@ -121,22 +117,22 @@ const IncomeForm: React.FC<IncomeFormProps> = ({
           variant="outlined"
           type="number"
           placeholder={occurrenceDayLabel}
-          value={incomeForm.occurrencesDay}
+          value={state.occurrencesDay}
           onChange={event => {
             const newOccurrencesDay = parseInt(event.target.value);
             const newIncome = {
-              ...incomeForm,
+              ...state,
               occurrencesDay: newOccurrencesDay,
             };
 
-            handleChange({
+            handleChange(fieldKey,{
               ...income,
               occurrences: {
                 ...income.occurrences,
                 day: newOccurrencesDay,
               },
             });
-            setIncome(newIncome);
+            setState(newIncome);
           }}
           name="occurrencesDay"
         />
@@ -147,23 +143,23 @@ const IncomeForm: React.FC<IncomeFormProps> = ({
             labelId={`occurrences-months-${fieldKey}`}
             variant="outlined"
             multiple
-            value={incomeForm.occurrencesMonths}
+            value={state.occurrencesMonths}
             input={<BootstrapInput />}
             onChange={event => {
               const newOccurrencesMonths = event.target.value as number[];
               const newIncome = {
-                ...incomeForm,
+                ...state,
                 occurrencesMonths: newOccurrencesMonths,
               };
 
-              handleChange({
+              handleChange(fieldKey, {
                 ...income,
                 occurrences: {
                   ...income.occurrences,
                   months: newOccurrencesMonths,
                 },
               });
-              setIncome(newIncome);
+              setState(newIncome);
             }}
           >
             <MenuItem disabled value="">Selecione os Meses</MenuItem>
@@ -182,34 +178,86 @@ const IncomeForm: React.FC<IncomeFormProps> = ({
           </Select>
         </FormControl>
       </Grid>
-      <Grid hidden={!income.discounts.length} item xs={6}>
+      <Grid item xs={6}>
         <Typography variant={"caption"}>Descontos</Typography>
         <List>
-          { income.discounts.map((discount, index) => {
+          { state.discounts.map((discount, index) => {
               return (
                 <IncomeDiscountForm key={index}
                                     fieldKey={index}
                                     discount={discount}
                                     handleChange={(index, discount) => {
-                                      // TODO:
-                                      //  - Create a state for income discounts
-                                      //  - Update the discount triggered in this event
-                                      //  - Call the callback using the new Income
-                                      console.log(index);
-                                      console.log(discount);
-                                    }}
-                                    handleRemove={(index) => {
-                                      // TODO:
-                                      //  - Create a state for income discounts
-                                      //  - Remove the discount triggered in this event
-                                      //  - Call the callback using the new Income
-                                      console.log(index);
+                                      const newDiscounts =
+                                        state
+                                          .discounts
+                                          .map((d, i) => i === index ? discount : d);
+
+                                      handleChange(fieldKey, {
+                                        ...income,
+                                        discounts: newDiscounts,
+                                      });
+
+                                      setState({
+                                        ...state,
+                                        discounts: newDiscounts,
+                                      });
                                     }}
                 />
               );
             })
           }
         </List>
+
+        <Button color={"default"}
+                style={{
+                  margin: '8px',
+                }}
+                onClick={e => {
+                  e.preventDefault();
+                  const discount = {
+                    amount: {
+                      amount: 0,
+                      currency: 'BRL',
+                    },
+                    discountType: 'OTHER',
+                  } as Discount;
+
+                  const newDiscounts = [...state.discounts, ...[discount]];
+
+                  handleChange(fieldKey, {
+                    ...income,
+                    discounts: newDiscounts,
+                  });
+
+                  setState({
+                    ...state,
+                    discounts: newDiscounts,
+                  })
+                }}>
+          Adicionar Desconto
+        </Button>
+        <Button color={"default"}
+                style={{
+                  margin: '8px',
+                }}
+                onClick={e => {
+                  e.preventDefault();
+                  const index = state.discounts.length - 1;
+                  const newDiscounts = state.discounts.filter((_, i) => i !== index);
+
+                  handleChange(fieldKey, {
+                    ...income,
+                    discounts: newDiscounts,
+                  });
+
+                  setState({
+                    ...state,
+                    discounts: newDiscounts,
+                  });
+                }}
+        >
+          Remover Último Desconto
+        </Button>
       </Grid>
     </Grid>
   );

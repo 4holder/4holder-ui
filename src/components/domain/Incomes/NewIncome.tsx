@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import { RouteComponentProps } from '@reach/router';
 import {
+	Button,
 	createStyles,
 	Grid,
 	TextField,
@@ -10,11 +11,11 @@ import {
 import AuthenticatedPage from "../AuthenticatedPage";
 import { makeStyles } from '@material-ui/core/styles';
 import { calculateBaseCLTContract } from "../../../clients/publicApiClient";
-import Dinero, { Currency } from "dinero.js";
+import Dinero  from "dinero.js";
 import MoneyFormat from "../../common/NumberFormat/MoneyFormat";
 import IncomeForm from "./Forms/IncomeForm";
-import {Amount, Discount} from "./types";
-import {sanitizeValue} from "./utils";
+import {Amount, Income} from "./types";
+import { sanitizeValue } from "./utils";
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
 	root: {
@@ -30,20 +31,9 @@ interface FormValues {
 	incomes: Income[];
 }
 
-export interface Income {
-	name: string;
-	occurrences: {
-		day: number;
-		months: number[];
-	};
-	amount: Amount;
-	discounts: Discount[];
-}
-
 export interface Contract {
-	netSalary: Income;
-	thirteenthSalary: Income;
-	thirteenthSalaryAdvance: Income;
+	grossSalary: Amount;
+	incomes: Income[];
 }
 
 export interface CLTBaseForm {
@@ -72,16 +62,19 @@ const NewIncome: React.FC<RouteComponentProps> = () => {
 		).then((response: Contract) => {
 			setFormValues({
 				...formValues,
-				incomes: [
-					response.netSalary,
-					response.thirteenthSalaryAdvance,
-					response.thirteenthSalary,
-				],
+				incomes: [],
+			});
+
+			setFormValues({
+				...formValues,
+				incomes: response.incomes,
 			});
 		});
 	};
 
-	useEffect(() => updateBaseCLTContract(), [cltBaseFormValues]);
+	useEffect(() => {
+		updateBaseCLTContract();
+	}, [cltBaseFormValues]);
 
 	const handleBaseCLTChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const value = sanitizeValue(event.target.value) || 0;
@@ -92,68 +85,15 @@ const NewIncome: React.FC<RouteComponentProps> = () => {
 		});
 	};
 
-	function updateIncome(newIncome: Income, index: number) {
-		const newIncomes = formValues.incomes.map((income, i) => i === index ? newIncome : income);
-
-		const newFormValues = {
-			...formValues,
-			incomes: newIncomes,
-		} as FormValues;
-
-		setFormValues(newFormValues);
-	}
-
-	const handleAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		const value = sanitizeValue(event.target.value) || 0;
-		const index = parseInt(event.target.name);
-
-		const updatedIncome = {
-			...formValues.incomes[index],
-			amount: {
-				...formValues.incomes[index].amount,
-				amount: value,
-			},
-		} as Income;
-
-		updateIncome(updatedIncome, index);
-	};
-
-	const handleOccurrencesDayChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		const day = parseInt(event.target.value) || 0;
-		const index = parseInt(event.target.name.replace(/[a-zA-Z_]/g, ''));
-
-		const updatedIncome = {
-			...formValues.incomes[index],
-			occurrences: {
-				...formValues.incomes[index].occurrences,
-				day: day,
-			},
-		} as Income;
-
-		updateIncome(updatedIncome, index);
-	};
-
-	const handleOccurrencesMonthsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		const day = parseInt(event.target.value) || 0;
-		const index = parseInt(event.target.name.replace(/[a-zA-Z_]/g, ''));
-
-		const updatedIncome = {
-			...formValues.incomes[index],
-			occurrences: {
-				...formValues.incomes[index].occurrences,
-				day: day,
-			},
-		} as Income;
-
-		updateIncome(updatedIncome, index);
-	};
-
 	return (
 		<AuthenticatedPage>
 			<form className={classes.root} noValidate autoComplete="off">
 				<Grid container spacing={3}>
 					<Grid item xs={12}>
 						<Typography variant={"h4"}>Adicionar Proventos</Typography>
+					</Grid>
+					<Grid item xs={12}>
+
 					</Grid>
 					<Grid item xs={12}>
 						<TextField
@@ -164,7 +104,6 @@ const NewIncome: React.FC<RouteComponentProps> = () => {
 							SelectProps={{
 								native: true,
 							}}
-							helperText="Tipo de Provento. Ex.: CLT"
 						>
 							<option key="CLT" value="CLT">CLT</option>
 						</TextField>
@@ -206,14 +145,45 @@ const NewIncome: React.FC<RouteComponentProps> = () => {
 							}}
 						/>
 					</Grid>
-
-					{ formValues.incomes.map((income, i) => (
-						<IncomeForm key={i}
-												fieldKey={i}
-												income={income}
-												handleChange={() => null}
-						/>
-						))}
+					<Grid item xs={12}>
+						{ formValues.incomes.map((income, i) => (
+							<IncomeForm key={i}
+													fieldKey={i}
+													income={income}
+													handleChange={() => null}
+							/>))
+						}
+						<hr />
+						<Button color={"default"}
+										variant={"outlined"}
+										style={{
+											margin: '8px',
+										}}
+										onClick={e => {
+											e.preventDefault();
+											console.log('Adicionar provento..');
+										}}>
+							Adicionar Provento
+						</Button>
+						<Button color={"default"}
+										variant={"outlined"}
+										style={{
+											margin: '8px',
+										}}
+										onClick={e => {
+											e.preventDefault();
+											console.log('Remover último provento..');
+										}}
+						>
+							Remover Último Provento
+						</Button>
+						<hr />
+						<Button variant="contained"
+										color="primary"
+										fullWidth>
+							Salvar
+						</Button>
+					</Grid>
 				</Grid>
 			</form>
 		</AuthenticatedPage>

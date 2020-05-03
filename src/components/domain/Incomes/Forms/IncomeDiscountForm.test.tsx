@@ -19,7 +19,6 @@ describe('Income Discount Form', () => {
   it('should proper render discount components', () => {
     const {
       getAllByPlaceholderText,
-      getByTestId,
     } = render(
       <IncomeDiscountForm
         fieldKey={fieldKey}
@@ -29,8 +28,7 @@ describe('Income Discount Form', () => {
       />
     );
 
-    const inssInputEl =  getAllByPlaceholderText(discount.discountType)[0];
-    const removeDiscountEl = getByTestId('remove-button');
+    const inssInputEl =  getAllByPlaceholderText('Valor')[0];
 
     const inssFieldName = `discount_${fieldKey}`;
     expect(inssInputEl.getAttribute('name')).toEqual(inssFieldName);
@@ -46,8 +44,5 @@ describe('Income Discount Form', () => {
         }
       }
     );
-
-    fireEvent.click(removeDiscountEl);
-    expect(onRemoveMock).toBeCalledWith(0);
   });
 });
