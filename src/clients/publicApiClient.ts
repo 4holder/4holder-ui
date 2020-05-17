@@ -62,7 +62,7 @@ query(
     deductionsInCents: $deductionsInCents
   ) {
     grossSalary {
-      amount
+      amount: valueInCents
     }
     incomes {
       name
@@ -72,12 +72,12 @@ query(
         months
       }
       amount {
-        amount
+        amount: valueInCents
       }
       discounts {
         discountType
         amount {
-          amount
+          amount: valueInCents
         }
       }
     }
