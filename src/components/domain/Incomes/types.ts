@@ -1,5 +1,16 @@
 import { Currency } from "dinero.js";
 
+export enum ContractType {
+  CLT = "CLT",
+}
+
+export interface FinancialContract {
+  id: string;
+  name: string;
+  grossAmount: Amount;
+  contractType: ContractType;
+}
+
 export interface Income {
   name: string;
   incomeType: string;

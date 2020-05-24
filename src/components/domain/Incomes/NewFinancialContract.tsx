@@ -42,7 +42,7 @@ export interface CLTBaseForm {
 	deductions: string;
 }
 
-const NewIncome: React.FC<RouteComponentProps> = () => {
+const NewFinancialContract: React.FC<RouteComponentProps> = () => {
 	const classes = useStyles();
 	const [ cltBaseFormValues, setCLTBaseFormValues] = useState<CLTBaseForm>({
 		grossSalary: '200000',
@@ -211,4 +211,4 @@ const NewIncome: React.FC<RouteComponentProps> = () => {
 	);
 };
 
-export default NewIncome;
+export default NewFinancialContract;

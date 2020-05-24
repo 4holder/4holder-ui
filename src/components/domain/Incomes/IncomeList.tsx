@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import { RouteComponentProps } from '@reach/router';
 import {Button, createStyles, Grid, Link, Theme, Typography} from "@material-ui/core";
 import AuthenticatedPage from "../AuthenticatedPage";
@@ -11,6 +11,9 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import AddIcon from '@material-ui/icons/Add';
+import {FinancialContract} from "./types";
+import { getFinancialContracts } from "../../../clients/publicApiClient";
+import Dinero from "dinero.js";
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
 		table: {
@@ -31,12 +34,21 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 const IncomeList: React.FC<RouteComponentProps> = () => {
 	const classes = useStyles();
 
+	const [financialContracts, setFinancialContracts] = useState<FinancialContract[]>([]);
+
+	useEffect(() => {
+		getFinancialContracts(1, 20)
+			.then((financialContracts: FinancialContract[]) => {
+				setFinancialContracts(financialContracts);
+			});
+	});
+
 	return (
 		<AuthenticatedPage>
 			<Grid container spacing={3}>
 				<Grid container>
 					<Grid item xs={10}>
-						<Typography variant={"h4"}>Lista de Proventos</Typography>
+						<Typography variant={"h4"}>Contratos e Proventos</Typography>
 					</Grid>
 					<Grid item xs={2}>
 						<Link underline={'none'} href="/incomes/new" color={"textSecondary"}>
@@ -58,28 +70,21 @@ const IncomeList: React.FC<RouteComponentProps> = () => {
 						<Table className={classes.table} aria-label="spanning table">
 							<TableHead>
 								<TableRow>
-									<TableCell>Provento</TableCell>
+									<TableCell>Contrato</TableCell>
 									<TableCell>Tipo</TableCell>
-									<TableCell>Bruto</TableCell>
-									<TableCell>Descontos</TableCell>
-									<TableCell>Líquido</TableCell>
+									<TableCell>Bruto Mensal</TableCell>
 								</TableRow>
 							</TableHead>
 							<TableBody>
-								<TableRow key="Salário">
-									<TableCell>Salário Empresa X</TableCell>
-									<TableCell>Salary</TableCell>
-									<TableCell>R$2800,00</TableCell>
-									<TableCell>R$459,13</TableCell>
-									<TableCell>R$2.340,87</TableCell>
-								</TableRow>
-								<TableRow>
-									<TableCell rowSpan={3} />
-									<TableCell colSpan={1}>Subtotal</TableCell>
-									<TableCell>R$2800,00</TableCell>
-									<TableCell>R$459,13</TableCell>
-									<TableCell>R$2.340,87</TableCell>
-								</TableRow>
+								{financialContracts.map(financialContract => (
+									<TableRow key={financialContract.id}>
+										<TableCell>{financialContract.name}</TableCell>
+										<TableCell>{financialContract.contractType}</TableCell>
+										<TableCell>
+											{Dinero(financialContract.grossAmount).toFormat() }
+										</TableCell>
+									</TableRow>)
+								)}
 							</TableBody>
 						</Table>
 					</TableContainer>
