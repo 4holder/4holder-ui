@@ -146,6 +146,21 @@ const NewFinancialContract: React.FC<RouteComponentProps> = () => {
 						/>
 					</Grid>
 					<Grid item xs={12}>
+						<TextField
+							label="Nome"
+							value=""
+							name="contractName"
+							variant="outlined"
+						/>
+
+						<TextField
+							label="CNPJ"
+							value=""
+							name="companyCnpj"
+							variant="outlined"
+						/>
+					</Grid>
+					<Grid item xs={12}>
 						{ formValues.incomes.map((income, i) => (
 							<IncomeForm key={i}
 													fieldKey={i}
