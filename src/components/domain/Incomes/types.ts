@@ -4,11 +4,12 @@ export enum ContractType {
   CLT = "CLT",
 }
 
-export interface FinancialContract {
+export interface IncomeResume {
   id: string;
   name: string;
-  grossAmount: Amount;
-  contractType: ContractType;
+  yearlyGrossIncome?: Amount;
+  yearlyNetIncome?: Amount;
+  yearlyIncomeDiscount?: Amount;
 }
 
 export interface Income {

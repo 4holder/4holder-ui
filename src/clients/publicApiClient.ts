@@ -87,14 +87,21 @@ query(
 
 export const GET_FINANCIAL_CONTRACTS_QUERY = gql`
 query($page: Int!, $pageSize: Int!) {
-  getFinancialContracts(page: $page, pageSize: $pageSize) {
+  getIncomeResumes(page: $page, pageSize: $pageSize) {
     id
     name
-    grossAmount{
+    yearlyGrossIncome {
       amount: valueInCents
       currency
     }
-    contractType
+    yearlyNetIncome {
+      amount: valueInCents
+      currency
+    }
+    yearlyIncomeDiscount {
+      amount: valueInCents
+      currency
+    }
   }
 }
 `;
@@ -137,11 +144,10 @@ export const importAuth0User: () => Promise<UserProfile> = async () => {
     .then(result => result.data.baseCLTContract);
 };
 
-export const getFinancialContracts = (page: number, pageSize: number) => {
+export const getIncomeResumes = (page: number, pageSize: number) => {
   type Variables = {
     page: number;
     pageSize: number;
-    deductionsInCents: number;
   }
   const variables = {
     page,
@@ -153,5 +159,5 @@ export const getFinancialContracts = (page: number, pageSize: number) => {
       query: GET_FINANCIAL_CONTRACTS_QUERY,
       variables
     } as QueryOptions<Variables>)
-    .then(result => result.data.getFinancialContracts);
+    .then(result => result.data.getIncomeResumes);
 };

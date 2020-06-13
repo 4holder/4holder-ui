@@ -11,8 +11,8 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import AddIcon from '@material-ui/icons/Add';
-import {FinancialContract} from "./types";
-import { getFinancialContracts } from "../../../clients/publicApiClient";
+import {IncomeResume} from "./types";
+import { getIncomeResumes } from "../../../clients/publicApiClient";
 import Dinero from "dinero.js";
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
@@ -34,12 +34,12 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 const IncomeList: React.FC<RouteComponentProps> = () => {
 	const classes = useStyles();
 
-	const [financialContracts, setFinancialContracts] = useState<FinancialContract[]>([]);
+	const [incomeResumes, setIncomeResumes] = useState<IncomeResume[]>([]);
 
 	useEffect(() => {
-		getFinancialContracts(1, 20)
-			.then((financialContracts: FinancialContract[]) => {
-				setFinancialContracts(financialContracts);
+		getIncomeResumes(1, 20)
+			.then((financialContracts: IncomeResume[]) => {
+				setIncomeResumes(financialContracts);
 			});
 	});
 
@@ -70,18 +70,24 @@ const IncomeList: React.FC<RouteComponentProps> = () => {
 						<Table className={classes.table} aria-label="spanning table">
 							<TableHead>
 								<TableRow>
-									<TableCell>Contrato</TableCell>
-									<TableCell>Tipo</TableCell>
-									<TableCell>Bruto Mensal</TableCell>
+									<TableCell>Nome</TableCell>
+									<TableCell>Bruto Anual</TableCell>
+									<TableCell>Líquido Anual</TableCell>
+									<TableCell>Desconto Anual</TableCell>
 								</TableRow>
 							</TableHead>
 							<TableBody>
-								{financialContracts.map(financialContract => (
-									<TableRow key={financialContract.id}>
-										<TableCell>{financialContract.name}</TableCell>
-										<TableCell>{financialContract.contractType}</TableCell>
+								{incomeResumes.map(incomeResume => (
+									<TableRow key={incomeResume.id}>
+										<TableCell>{incomeResume.name}</TableCell>
 										<TableCell>
-											{Dinero(financialContract.grossAmount).toFormat() }
+											{Dinero(incomeResume.yearlyGrossIncome).toFormat() }
+										</TableCell>
+										<TableCell>
+											{Dinero(incomeResume.yearlyNetIncome).toFormat() }
+										</TableCell>
+										<TableCell>
+											{Dinero(incomeResume.yearlyIncomeDiscount).toFormat() }
 										</TableCell>
 									</TableRow>)
 								)}
