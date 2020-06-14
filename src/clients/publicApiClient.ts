@@ -6,6 +6,7 @@ import { createHttpLink } from 'apollo-link-http';
 
 import auth from "../auth/auth";
 import config from "../config";
+import {FinancialMovementsProjection, ProjectionPoint} from "../components/domain/Incomes/types";
 
 // @ts-ignore
 const httpLink = createHttpLink({
@@ -106,6 +107,22 @@ query($page: Int!, $pageSize: Int!) {
 }
 `;
 
+export const GET_PROJECTIONS_QUERY = gql`
+query($page: Int!, $pageSize: Int!) {
+  getIncomeProjections(page: $page, pageSize: $pageSize) {
+    label
+    currency
+    financialMovements {
+      amount {
+        amount: valueInCents
+        currency
+      }
+      dateTime
+    }
+  }
+}
+`;
+
 export const calculateBaseCLTContract = (
   grossSalaryInCents: number,
   dependentsQuantity: number,
@@ -160,4 +177,28 @@ export const getIncomeResumes = (page: number, pageSize: number) => {
       variables
     } as QueryOptions<Variables>)
     .then(result => result.data.getIncomeResumes);
+};
+
+export const getIncomeProjections = (page: number = 1, pageSize: number = 100) => {
+  type Variables = {
+    page: number;
+    pageSize: number;
+  }
+  const variables = {
+    page,
+    pageSize,
+  } as Variables;
+
+  return client
+    .query({
+      query: GET_PROJECTIONS_QUERY,
+      variables
+    } as QueryOptions<Variables>)
+    .then(result => result.data.getIncomeProjections.map((projection: FinancialMovementsProjection) => ({
+      ...projection,
+      financialMovements: projection.financialMovements.map((point : ProjectionPoint) => ({
+        ...point,
+        dateTime: new Date(point.dateTime.toString()),
+      })),
+    })));
 };

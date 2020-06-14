@@ -33,3 +33,13 @@ export interface Discount {
   discountType: string;
 }
 
+export interface ProjectionPoint {
+  amount: Amount;
+  dateTime: Date;
+}
+
+export interface FinancialMovementsProjection {
+  label: String;
+  currency: String;
+  financialMovements: ProjectionPoint[];
+}

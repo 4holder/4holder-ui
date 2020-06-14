@@ -14,6 +14,7 @@ import AddIcon from '@material-ui/icons/Add';
 import {IncomeResume} from "./types";
 import { getIncomeResumes } from "../../../clients/publicApiClient";
 import Dinero from "dinero.js";
+import IncomeProjectionChart from "./IncomeProjectionChart";
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
 		table: {
@@ -94,6 +95,10 @@ const IncomeList: React.FC<RouteComponentProps> = () => {
 							</TableBody>
 						</Table>
 					</TableContainer>
+				</Grid>
+
+				<Grid item xs={12}>
+					<IncomeProjectionChart />
 				</Grid>
 			</Grid>
 		</AuthenticatedPage>
