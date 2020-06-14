@@ -49,7 +49,7 @@ const IncomeList: React.FC<RouteComponentProps> = () => {
 			<Grid container spacing={3}>
 				<Grid container>
 					<Grid item xs={10}>
-						<Typography variant={"h4"}>Contratos e Proventos</Typography>
+						<Typography variant={"h4"}>Incomes</Typography>
 					</Grid>
 					<Grid item xs={2}>
 						<Link underline={'none'} href="/incomes/new" color={"textSecondary"}>
@@ -60,7 +60,7 @@ const IncomeList: React.FC<RouteComponentProps> = () => {
 								className={classes.button}
 								startIcon={<AddIcon />}
 							>
-								Adicionar Provento
+								Add Income
 							</Button>
 						</Link>
 					</Grid>
@@ -71,10 +71,10 @@ const IncomeList: React.FC<RouteComponentProps> = () => {
 						<Table className={classes.table} aria-label="spanning table">
 							<TableHead>
 								<TableRow>
-									<TableCell>Nome</TableCell>
-									<TableCell>Bruto Anual</TableCell>
-									<TableCell>Líquido Anual</TableCell>
-									<TableCell>Desconto Anual</TableCell>
+									<TableCell>Name</TableCell>
+									<TableCell>Yearly Gross Amount</TableCell>
+									<TableCell>Yearly Net Amount</TableCell>
+									<TableCell>Yearly Discounts</TableCell>
 								</TableRow>
 							</TableHead>
 							<TableBody>
