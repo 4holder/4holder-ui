@@ -62,10 +62,15 @@ const IncomeProjectionChart: React.FC<RouteComponentProps> = () => {
 
         const grossIncomeChartData = grossIncomeProjections ? grossIncomeProjections
           .financialMovements
-          .map(f => ({
-            month: monthLabels[f.dateTime.getMonth()],
-            grossIncome: f.amount.amount/100,
-          })) : [];
+          .map(f => {
+            console.log("---");
+            console.log(f.dateTime.getMonth(), monthLabels[f.dateTime.getMonth()]);
+            console.log("---");
+            return ({
+              month: monthLabels[f.dateTime.getMonth()],
+              grossIncome: f.amount.amount/100,
+            })
+          }) : [];
 
         const netIncomeProjections = projections.find(p => p.label === 'Net Income');
 
