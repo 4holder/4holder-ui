@@ -6,7 +6,7 @@ import { createHttpLink } from 'apollo-link-http';
 
 import auth from "../auth/auth";
 import config from "../config";
-import {FinancialMovementsProjection, ProjectionPoint} from "../components/domain/Incomes/types";
+import {FinancialMovementsProjection, ProjectionPoint} from "../components/domain/IncomeManagement/types";
 
 // @ts-ignore
 const httpLink = createHttpLink({

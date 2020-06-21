@@ -9,7 +9,7 @@ import Callback from "./components/domain/Auth/Callback";
 import Home from "./components/domain/Home";
 import blue from '@material-ui/core/colors/blue';
 import green from '@material-ui/core/colors/green';
-import { IncomeList, NewIncome } from "./components/domain/Incomes";
+import { IncomeList, NewIncome } from "./components/domain/IncomeManagement";
 
 const theme = createMuiTheme({
   palette: {
