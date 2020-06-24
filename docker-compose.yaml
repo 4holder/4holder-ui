@@ -1,0 +1,69 @@
+version: '3.5'
+
+services:
+    cash-flow-service-db:
+        hostname: cash-flow-service-db
+        image: postgres
+        ports:
+            - 5432:5432
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+
+    cash-flow-service-db-migration:
+        image: boxfuse/flyway:5.2.4
+        command: -url=jdbc:postgresql://cash-flow-service-db:5432/postgres -schemas=public -user=postgres -password=postgres -connectRetries=60 migrate
+        volumes:
+            - ./migrations:/flyway/sql
+        depends_on:
+            - cash-flow-service-db
+
+    cash-flow-service:
+        hostname: case-flow-service
+        image: circleci/openjdk:8
+        command: ["sbt", "run"]
+        ports:
+            - 9000:9000
+        environment:
+            JAVA_OPTS: "-Xmx8G"
+            APPLICATION_SECRET: an-app-secret
+            HTTP_APPLICATION_SECRET: a-http-app-secret
+            DATABASE_CONNECTION_STRING: "jdbc:postgresql://cash-flow-service-db:5432/postgres?user=postgres&password=postgres"
+        working_dir: /home/root/app
+        volumes:
+            - ../cash-flow-service:/home/root/app
+        depends_on:
+            - cash-flow-service-db
+
+    public-service-db:
+        hostname: public-service-db
+        image: postgres
+        ports:
+            - 5433:5432
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+
+    public-service-db-migration:
+        image: boxfuse/flyway:5.2.4
+        command: -url=jdbc:postgresql://public-service-db:5432/postgres -schemas=public -user=postgres -password=postgres -connectRetries=60 migrate
+        volumes:
+            - ./migrations:/flyway/sql
+        depends_on:
+            - public-service-db
+
+    public-service:
+        image: node:12
+        command: ["npm", "start"]
+        ports:
+            - 3000:3000
+        environment:
+            DATABASE_HOST: public-service-db
+            CASH_FLOW_SERVICE_URL: http://cash-flow-service
+        working_dir: /home/root/app
+        env_file:
+            - ../public_service/.env
+        volumes:
+            - ../public_service:/home/root/app
+        depends_on:
+            - public-service-db

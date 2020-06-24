@@ -78,7 +78,7 @@ export const TopNav: React.FC<Props> = (props) => {
             <Grid item>
               {props.menuIcon}
               <Typography style={{marginTop: "15px", position: "absolute"}} variant="h6" component="span">
-                <Link underline={'none'} href="/" color={"textSecondary"}>4HOLDER</Link>
+                <Link underline={'none'} href="/" style={{color: '#fff'}}>4HOLDER</Link>
               </Typography>
             </Grid>
 
