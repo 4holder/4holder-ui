@@ -4,6 +4,19 @@ export enum ContractType {
   CLT = "CLT",
 }
 
+export enum IncomeType {
+  SALARY = "SALARY",
+}
+
+export enum DiscountType {
+  INSS = "INSS",
+}
+
+export interface Occurrences {
+  day: number;
+  months: number[];
+}
+
 export interface IncomeResume {
   id: string;
   name: string;
@@ -12,25 +25,9 @@ export interface IncomeResume {
   yearlyIncomeDiscount?: Amount;
 }
 
-export interface Income {
-  name: string;
-  incomeType: string;
-  occurrences: {
-    day: number;
-    months: number[];
-  };
-  amount: Amount;
-  discounts: Discount[];
-}
-
 export interface Amount {
   amount: number;
   currency: Currency;
-}
-
-export interface Discount {
-  amount: Amount;
-  discountType: string;
 }
 
 export interface ProjectionPoint {
@@ -42,4 +39,27 @@ export interface FinancialMovementsProjection {
   label: String;
   currency: String;
   financialMovements: ProjectionPoint[];
+}
+
+export interface NewIncomeDiscountInput {
+  name: string;
+  amount: Amount;
+  discountType: DiscountType;
+}
+
+export interface NewIncomeInput {
+  name: string;
+  amount: Amount;
+  incomeType: IncomeType;
+  occurrences: Occurrences;
+  discounts: NewIncomeDiscountInput[];
+}
+
+export interface NewFinancialContractInput {
+  name: string;
+  contractType: ContractType;
+  companyCnpj?: string;
+  startDate: Date;
+  endDate?: Date;
+  incomes: NewIncomeInput[];
 }

@@ -6,7 +6,7 @@ import {makeStyles} from '@material-ui/core/styles';
 import {ClassNameMap} from "@material-ui/core/styles/withStyles";
 import ContractForm from "./Forms/ContractForm";
 import IncomeForm from "./Forms/IncomeForm";
-import IncomeDiscountForm from "./Forms/IncomeDiscountForm";
+import Review from "./Forms/Review";
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
 	root: {
@@ -35,6 +35,8 @@ function getStepContent(stepIndex: Number, classes: ClassNameMap<string>) {
 			return <ContractForm />;
 		case 1:
 			return <IncomeForm />;
+		case 2:
+			return <Review />;
 	}
 }
 
