@@ -51,7 +51,7 @@ const Home: React.FC<RouteComponentProps> = () => {
           </Typography>
           <br />
           <Typography variant="overline" component="span">
-            All of this is about enable you to continuously improve on your finances, investments goals and strategy
+            All of this is about enable you to continuously improve your finances, investments goals and strategy
           </Typography>
         </div>
       </Grid>
