@@ -3,7 +3,7 @@ import {Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow}
 import {makeStyles} from "@material-ui/core/styles";
 
 const useStyles = makeStyles({
-  table: {
+  cover: {
     minWidth: 650,
   },
 });
@@ -13,7 +13,7 @@ const Review: React.FC = () => {
 
   return (
     <TableContainer component={Paper} >
-      <Table className={classes.table}>
+      <Table className={classes.cover}>
         <TableHead>
           <TableRow>
             <TableCell colSpan={4}>Good Company that Pay You Out</TableCell>

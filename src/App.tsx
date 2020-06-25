@@ -6,7 +6,7 @@ import './App.css';
 import NotFound from "./components/domain/NotFound";
 import Dashboard from "./components/domain/Dashboard";
 import Callback from "./components/domain/Auth/Callback";
-import Home from "./components/domain/Home";
+import Home from "./components/domain/LandingPage";
 import blue from '@material-ui/core/colors/blue';
 import green from '@material-ui/core/colors/green';
 import { IncomeList, NewIncome } from "./components/domain/IncomeManagement";

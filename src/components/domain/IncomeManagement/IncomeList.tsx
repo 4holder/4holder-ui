@@ -17,7 +17,7 @@ import Dinero from "dinero.js";
 import IncomeProjectionChart from "./IncomeProjectionChart";
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
-		table: {
+		cover: {
 			minWidth: 700,
 		},
 		paper: {
@@ -68,7 +68,7 @@ const IncomeList: React.FC<RouteComponentProps> = () => {
 
 				<Grid item xs={12}>
 					<TableContainer component={Paper}>
-						<Table className={classes.table} aria-label="spanning table">
+						<Table className={classes.cover} aria-label="spanning table">
 							<TableHead>
 								<TableRow>
 									<TableCell>Name</TableCell>
