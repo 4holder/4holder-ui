@@ -9,7 +9,7 @@ import IncomeForm from "./Forms/IncomeForm";
 import Review from "./Forms/Review";
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
-	root: {
+	cardRoot: {
 		'& .MuiTextField-root': {
 			margin: theme.spacing(1),
 			width: '25ch',
@@ -64,7 +64,7 @@ const NewFinancialContract: React.FC<RouteComponentProps> = () => {
 
 	return (
 		<AuthenticatedPage>
-			<form className={classes.root} noValidate autoComplete="off">
+			<form className={classes.cardRoot} noValidate autoComplete="off">
 				<Grid container spacing={3}>
 					<Grid item xs={12}>
 						<Stepper activeStep={activeStep} alternativeLabel>

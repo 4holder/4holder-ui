@@ -29,7 +29,6 @@ class Auth {
         if (authResult && authResult.accessToken && authResult.idToken) {
           this.setSession(authResult.idToken, authResult.expiresIn);
 
-
           return resolve();
         }
 

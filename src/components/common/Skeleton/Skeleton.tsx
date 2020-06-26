@@ -6,7 +6,7 @@ import Typography from "@material-ui/core/Typography";
 import {makeStyles} from "@material-ui/core/styles";
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    root: {
+    cardRoot: {
       display: 'flex',
     },
     menuButton: {
@@ -35,7 +35,7 @@ const Skeleton: React.FC<RouteComponentProps> = ({
  }: any) => {
   const classes = useStyles();
   return (
-    <div className={classes.root}>
+    <div className={classes.cardRoot}>
       <NavDrawer />
       <main className={classes.content}>
         <div className={classes.toolbar} />

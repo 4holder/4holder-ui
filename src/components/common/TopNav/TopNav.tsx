@@ -25,7 +25,7 @@ import { makeStyles } from "@material-ui/core/styles";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    root: {
+    cardRoot: {
       display: 'flex',
     },
   }),
@@ -68,7 +68,7 @@ export const TopNav: React.FC<Props> = (props) => {
   };
 
   return (
-    <div className={classes.root}>
+    <div className={classes.cardRoot}>
       <AppBar className={props.appBarShift}>
         <Toolbar>
           <Grid

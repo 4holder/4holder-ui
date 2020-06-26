@@ -20,7 +20,7 @@ const drawerWidth = 240;
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    root: {
+    cardRoot: {
       display: 'flex',
     },
     appBar: {
