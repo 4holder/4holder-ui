@@ -39,7 +39,7 @@ const Skeleton: React.FC<RouteComponentProps> = ({
       <NavDrawer />
       <main className={classes.content}>
         <div className={classes.toolbar} />
-        <Typography>
+        <Typography component="div">
           {children}
         </Typography>
       </main>

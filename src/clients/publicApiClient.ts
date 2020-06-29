@@ -6,7 +6,12 @@ import { createHttpLink } from 'apollo-link-http';
 
 import auth from "../auth/auth";
 import config from "../config";
-import {FinancialMovementsProjection, ProjectionPoint} from "../components/domain/IncomeManagement/types";
+import {
+  Amount,
+  DiscountType,
+  FinancialMovementsProjection, IncomeType, Occurrences,
+  ProjectionPoint
+} from "../components/domain/IncomeManagement/types";
 
 // @ts-ignore
 const httpLink = createHttpLink({
@@ -122,6 +127,24 @@ query($page: Int!, $pageSize: Int!) {
   }
 }
 `;
+
+export interface IncomeDiscountResponse {
+  name: string;
+  amount: Amount;
+  discountType: DiscountType;
+}
+
+export interface IncomeResponse {
+  name: string;
+  amount: Amount;
+  incomeType: IncomeType;
+  occurrences: Occurrences;
+  discounts: IncomeDiscountResponse[];
+}
+
+export interface CLTContractResponse {
+  incomes: IncomeResponse[];
+}
 
 export const calculateBaseCLTContract = (
   grossSalaryInCents: number,

@@ -5,7 +5,8 @@ import MoneyFormat from "../../../common/NumberFormat/MoneyFormat";
 import MomentUtils from '@date-io/moment';
 import {KeyboardDatePicker, MuiPickersUtilsProvider} from "@material-ui/pickers";
 import {MaterialUiPickersDate} from "@material-ui/pickers/typings/date";
-import moment from "moment";
+import {NewFinancialContractInput} from "../types";
+import CNPJFormat from "../../../common/NumberFormat/CNPJFormat";
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
     formControl: {
@@ -19,13 +20,22 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
   })
 );
 
-const ContractForm: React.FC = () => {
-  const classes = useStyles();
-  const [selectedDate, setSelectedDate] =
-    React.useState<MaterialUiPickersDate>(moment());
+interface ContractFormProps {
+  inputData: NewFinancialContractInput;
+  handleInputDataChange: (key: string, value: string | Date) => void
+}
 
-  const handleDateChange = (date: MaterialUiPickersDate) => {
-    setSelectedDate(date);
+const ContractForm: React.FC<ContractFormProps> = (props) => {
+  const classes = useStyles();
+
+  const { contractType } = props.inputData;
+
+  const handleDateChange = (fieldName: string, date: MaterialUiPickersDate) => {
+    props.handleInputDataChange(fieldName, date ? date.toDate() : new Date());
+  };
+
+  const handleTextFieldChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+    props.handleInputDataChange(e.target.name, e.target.value);
   };
 
   return (
@@ -36,7 +46,7 @@ const ContractForm: React.FC = () => {
           <Select
             labelId="contract-type-label"
             id="contract-type"
-            value={"CLT"}
+            value={contractType}
             label="Contract Type"
             disabled={true} >
             <MenuItem value="CLT">CLT</MenuItem>
@@ -50,15 +60,21 @@ const ContractForm: React.FC = () => {
           InputProps={{
             inputComponent: MoneyFormat as any,
           }}
+          value={props.inputData.grossSalary}
+          onChange={handleTextFieldChange}
           className={classes.textField} />
         <TextField
           label="Dependents"
           type="number"
+          value={props.inputData.dependentsQuantity}
+          onChange={handleTextFieldChange}
           name="dependentsQuantity"
           className={classes.textField} />
         <TextField
           label="Legal Deductions"
           name="deductions"
+          value={props.inputData.deductions}
+          onChange={handleTextFieldChange}
           className={classes.textField}
           InputProps={{
             inputComponent: MoneyFormat as any,
@@ -66,16 +82,23 @@ const ContractForm: React.FC = () => {
       </Grid>
       <Grid item xs={12}>
         <TextField
-          label="Company Name"
+          label="Contract Name"
           className={classes.textField}
-          value=""
-          name="contractName" />
+          value={props.inputData.name}
+          onChange={handleTextFieldChange}
+          name="name"
+        />
 
         <TextField
           label="CNPJ"
           className={classes.textField}
-          value=""
-          name="companyCnpj" />
+          value={props.inputData.companyCnpj}
+          onChange={handleTextFieldChange}
+          name="companyCnpj"
+          InputProps={{
+            inputComponent: CNPJFormat as any,
+          }}
+        />
       </Grid>
       <MuiPickersUtilsProvider utils={MomentUtils}>
         <Grid item xs={12}>
@@ -84,8 +107,9 @@ const ContractForm: React.FC = () => {
             variant="inline"
             format={"MMMM DD, yyyy"}
             label="Start Date"
-            value={selectedDate}
-            onChange={handleDateChange}
+            value={props.inputData.startDate}
+            name="startDate"
+            onChange={date => handleDateChange("startDate", date)}
             className={classes.textField}
             KeyboardButtonProps={{
               'aria-label': 'change date',
@@ -97,9 +121,9 @@ const ContractForm: React.FC = () => {
             variant="inline"
             format={"MMMM DD, yyyy"}
             label="End Date"
-            value={selectedDate}
+            value={props.inputData.endDate}
             className={classes.textField}
-            onChange={handleDateChange}
+            onChange={date => handleDateChange("endDate", date)}
             KeyboardButtonProps={{
               'aria-label': 'change date',
             }}

@@ -2,7 +2,7 @@ import React from "react";
 import NumberFormat from "react-number-format";
 import {NumberFormatCustomProps} from "./NumberFormatTypes";
 
-export default function MoneyFormat(props: NumberFormatCustomProps) {
+export default function CNPJFormat(props: NumberFormatCustomProps) {
   const { inputRef, onChange, ...other } = props;
 
   return (
@@ -17,11 +17,9 @@ export default function MoneyFormat(props: NumberFormatCustomProps) {
           },
         });
       }}
-      thousandSeparator="."
-      decimalSeparator=","
-      decimalScale={2}
+      format="##.###.###/####-##"
+      mask="_"
       isNumericString
-      prefix="R$"
     />
   );
 }

@@ -59,7 +59,7 @@ services:
             - 3000:3000
         environment:
             DATABASE_HOST: public-service-db
-            CASH_FLOW_SERVICE_URL: http://cash-flow-service
+            CASH_FLOW_SERVICE_URL: http://cash-flow-service:9000
         working_dir: /home/root/app
         env_file:
             - ../public_service/.env

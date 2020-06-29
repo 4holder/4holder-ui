@@ -62,4 +62,7 @@ export interface NewFinancialContractInput {
   startDate: Date;
   endDate?: Date;
   incomes: NewIncomeInput[];
+  grossSalary: number;
+  dependentsQuantity: number;
+  deductions: number;
 }

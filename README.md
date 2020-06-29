@@ -12,7 +12,7 @@ Run the dependencies. At the FIRST TIME it will take a couple of minutes to down
 - public service will be running at port 3000. Take a look on its documentation because a `.env` is necessary in `public-service` dir.
 - cash flow service will run at 9000.
 
-Take a look on the docker-compose file for more information.
+Find more info on the docker-compose file.
 
 Now, you just need to run the application with:
 ```shell script
