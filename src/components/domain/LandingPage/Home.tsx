@@ -102,7 +102,7 @@ const Home: React.FC<RouteComponentProps> = () => {
                   Incomes Management
                 </Typography>
                 <Typography variant="body2" component="p" align={"justify"}>
-                  Have visibility on the your incomes and the discounts.
+                  Have visibility of your incomes and the discounts.
                 </Typography>
               </CardContent>
             </Card>
