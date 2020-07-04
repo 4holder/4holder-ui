@@ -143,9 +143,9 @@ const NavDrawer: React.FC = () => {
             </ListItem>
           </Link>
           <Link underline={'none'} href="/incomes" color={"textSecondary"}>
-            <ListItem button key="Proventos">
+            <ListItem button key="Incomes">
               <ListItemIcon><AttachMoneyIcon /></ListItemIcon>
-              <ListItemText primary="Proventos" />
+              <ListItemText primary="Incomes" />
             </ListItem>
           </Link>
         </List>

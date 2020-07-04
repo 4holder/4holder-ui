@@ -52,6 +52,10 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
     textAlign: "center",
     padding: 10,
   },
+  openMessage: {
+    textAlign: "center",
+    padding: 20,
+  },
 }));
 
 const Home: React.FC<RouteComponentProps> = () => {
@@ -154,6 +158,18 @@ const Home: React.FC<RouteComponentProps> = () => {
             </Card>
           </Grid>
         </Grid>
+      </Grid>
+      <Grid item xs={12}>
+        <Divider variant="middle" />
+      </Grid>
+      <Grid item xs={12}>
+        <div className={classes.openMessage}>
+          <Typography variant="h6">That's a Open Source project</Typography>
+          <Typography variant="body1">
+            If you wanna contribute, take a look on our <Link href="https://github.com/4holder" target="_blank">github</Link><br />
+            or feel free to send an email to <Link href="mailto:ronierison.silva@gmail.com">ronierison.silva@gmail.com</Link>
+          </Typography>
+        </div>
       </Grid>
       <Grid item xs={12}>
         <Divider variant="middle" />

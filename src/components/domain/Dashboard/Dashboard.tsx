@@ -7,7 +7,7 @@ const Dashboard: React.FC<RouteComponentProps> = () => {
 	return (
 		<AuthenticatedPage>
 			<Typography variant="h3" component="span">
-				O conteúdo do dashboard ficará aqui.
+				Oh, something would be here. Maybe some charts and tables in a good dashboard!
 			</Typography>
 		</AuthenticatedPage>
 	);
