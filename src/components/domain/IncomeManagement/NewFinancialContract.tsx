@@ -35,12 +35,16 @@ function getStepContent(
 	stepIndex: Number,
 	formData: NewFinancialContractInput,
 	handleFormData: (key: string, value: IncomeContentTypes) => void,
+	handleIncomeInputDataChange: (index: number, key: string, value: string) => void
 ) {
 	switch (stepIndex) {
 		case 0:
 			return <ContractForm inputData={formData} handleInputDataChange={handleFormData}/>;
 		case 1:
-			return <IncomeForm inputData={formData} handleInputDataChange={handleFormData} />;
+			return <IncomeForm
+				inputData={formData}
+				handleInputDataChange={handleFormData}
+				handleIncomeInputDataChange={handleIncomeInputDataChange} />;
 		case 2:
 			return <Review />;
 	}
@@ -85,6 +89,18 @@ const NewFinancialContract: React.FC<RouteComponentProps> = () => {
 		})
 	};
 
+	const handleIncomeInputDataChange = (index: number, key: string, value: string) => {
+		const updatedIncome = {
+			...formData.incomes[index],
+			[key]: value,
+		};
+
+		setFormData({
+			...formData,
+			incomes: formData.incomes.map((income, i) => i === index? updatedIncome : income)
+		})
+	};
+
 	return (
 		<AuthenticatedPage>
 			<form className={classes.cardRoot} noValidate autoComplete="off">
@@ -107,7 +123,7 @@ const NewFinancialContract: React.FC<RouteComponentProps> = () => {
 						) : (
 							<div>
 								<div className={classes.instructions}>
-									{getStepContent(activeStep, formData, handleFormDataChange)}
+									{getStepContent(activeStep, formData, handleFormDataChange, handleIncomeInputDataChange)}
 								</div>
 								<div>
 									<Button

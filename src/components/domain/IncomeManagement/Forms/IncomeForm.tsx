@@ -54,6 +54,7 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 interface IncomeFormProps {
   inputData: NewFinancialContractInput;
   handleInputDataChange: (key: string, value: string | Date | NewIncomeInput[]) => void
+  handleIncomeInputDataChange: (index: number, key: string, value: string) => void
 }
 
 
@@ -82,6 +83,10 @@ const IncomeForm: React.FC<IncomeFormProps> = (props) => {
     updateBaseCLTContract();
   }, []);
 
+  const handleTextFieldChange = (index: number) => (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+    props.handleIncomeInputDataChange(index, e.target.name, e.target.value as string);
+  };
+
   return (
     <Grid container>
       <Paper>
@@ -93,9 +98,12 @@ const IncomeForm: React.FC<IncomeFormProps> = (props) => {
                   <InputLabel id="income-type-label">Income Type</InputLabel>
                   <Select
                     labelId="income-type-label"
-                    id="income-type"
+                    name="incomeType"
                     label="Income Type"
                     value={income.incomeType}
+                    onChange={e => {
+                      props.handleIncomeInputDataChange(index, 'incomeType', e.target.value as string);
+                    }}
                   >
                     <MenuItem disabled value="">Income Type</MenuItem>
                     <MenuItem value="SALARY">Salary</MenuItem>
@@ -109,11 +117,14 @@ const IncomeForm: React.FC<IncomeFormProps> = (props) => {
                   label="Income Name"
                   className={classes.textField}
                   value={income.name}
+                  name="name"
+                  onChange={handleTextFieldChange(index)}
                 />
                 <TextField
-                  label="Value"
+                  label="Amount"
                   className={classes.textField}
                   value={income.amount.amount/100}
+                  onChange={handleTextFieldChange(index)}
                   InputProps={{
                     inputComponent: MoneyFormat as any,
                   }} />
@@ -155,7 +166,10 @@ const IncomeForm: React.FC<IncomeFormProps> = (props) => {
                   <Grid item className={classes.discounts} xs={12} key={index}>
                     <FormControl className={classes.formControl}>
                       <InputLabel id={`discount-type-${index}`}>Discount Type</InputLabel>
-                      <Select labelId={`discount-type-${index}`}>
+                      <Select
+                        labelId={`discount-type-${index}`}
+                        value={discount.discountType}
+                      >
                         <MenuItem disabled value="">Discount Type</MenuItem>
                         <MenuItem value="INSS">INSS</MenuItem>
                         <MenuItem value="IRRF">IRRF</MenuItem>
