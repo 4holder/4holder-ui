@@ -57,14 +57,22 @@ interface IncomeFormProps {
 }
 
 
+const sanitizeMonetaryValue = (value: string | number) => {
+  return parseInt(value.toString().replace(".", ""));
+};
+
+const sanitizeNumber = (value: number) => {
+  return parseInt(value.toString());
+};
+
 const IncomeForm: React.FC<IncomeFormProps> = (props) => {
   const classes = useStyles();
 
   const updateBaseCLTContract = () => {
     calculateBaseCLTContract(
-      Math.round(props.inputData.grossSalary),
-      props.inputData.dependentsQuantity,
-      props.inputData.deductions,
+      sanitizeMonetaryValue(props.inputData.grossSalary),
+      sanitizeNumber(props.inputData.dependentsQuantity),
+      sanitizeMonetaryValue(props.inputData.deductions),
     ).then((response: CLTContractResponse) => {
       props.handleInputDataChange('incomes', response.incomes);
     });
@@ -72,7 +80,7 @@ const IncomeForm: React.FC<IncomeFormProps> = (props) => {
 
   useEffect(() => {
     updateBaseCLTContract();
-  });
+  }, []);
 
   return (
     <Grid container>
@@ -97,11 +105,15 @@ const IncomeForm: React.FC<IncomeFormProps> = (props) => {
                     <MenuItem value="OTHER">Other</MenuItem>
                   </Select>
                 </FormControl>
-                <TextField label="Income Name" className={classes.textField} />
+                <TextField
+                  label="Income Name"
+                  className={classes.textField}
+                  value={income.name}
+                />
                 <TextField
                   label="Value"
                   className={classes.textField}
-                  value={income.amount.amount}
+                  value={income.amount.amount/100}
                   InputProps={{
                     inputComponent: MoneyFormat as any,
                   }} />
@@ -156,13 +168,13 @@ const IncomeForm: React.FC<IncomeFormProps> = (props) => {
                     <TextField
                       label="Discount Name"
                       name={`discount-name-${index}`}
-                      value={discount.name}
+                      value={discount.name || discount.discountType}
                       className={classes.textField} />
                     <TextField
                       label="Value"
                       placeholder="Value"
                       name={`discount-value-${index}`}
-                      value={discount.amount.amount}
+                      value={discount.amount.amount/100}
                       className={classes.textField}
                       InputProps={{
                         inputComponent: MoneyFormat as any,

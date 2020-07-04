@@ -29,10 +29,12 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 	})
 );
 
+type IncomeContentTypes = string | Date | NewIncomeInput[];
+
 function getStepContent(
 	stepIndex: Number,
 	formData: NewFinancialContractInput,
-	handleFormData: (key: string, value: string | Date | NewIncomeInput[]) => void,
+	handleFormData: (key: string, value: IncomeContentTypes) => void,
 ) {
 	switch (stepIndex) {
 		case 0:
@@ -52,12 +54,12 @@ const NewFinancialContract: React.FC<RouteComponentProps> = () => {
 		name: "",
 		startDate: new Date(),
 		incomes: [],
-		grossSalary: 0,
+		grossSalary: 2000.13,
 		dependentsQuantity: 0,
 		deductions: 0,
 	});
 
-	const [activeStep, setActiveStep] = React.useState(0);
+	const [activeStep, setActiveStep] = React.useState(1);
 	const steps = [
 		'Contract Information',
 		'Incomes & Discounts',
@@ -76,7 +78,7 @@ const NewFinancialContract: React.FC<RouteComponentProps> = () => {
 		setActiveStep(0);
 	};
 
-	const handleFormDataChange = (key: string, value: string | Date | NewIncomeInput[]) => {
+	const handleFormDataChange = (key: string, value: IncomeContentTypes) => {
 		setFormData({
 			...formData,
 			[key]: value,
