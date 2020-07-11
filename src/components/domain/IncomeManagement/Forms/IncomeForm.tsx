@@ -15,12 +15,12 @@ import {
 } from "@material-ui/core";
 import DeleteIcon from '@material-ui/icons/Delete';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
-import {makeStyles} from "@material-ui/core/styles";
+import gql from "graphql-tag";
+import { useQuery } from "@apollo/react-hooks";
+import { makeStyles } from "@material-ui/core/styles";
 import MoneyFormat from "../../../common/NumberFormat/MoneyFormat";
 import {Amount, DiscountType, IncomeType, Occurrences} from "../types";
 import {NewFinancialContractForm, NewIncomeForm} from "../NewFinancialContract";
-import gql from "graphql-tag";
-import {useQuery} from "@apollo/react-hooks";
 
 const fieldWidth = 230;
 
@@ -123,105 +123,15 @@ query(
 }
 `;
 
-interface IncomeFieldsProps {
-  index: number;
-  handleIncomeInputDataChange: HandleIncomeInputDataChange;
-  handleTextFieldChange: (index: number) => (e: EditableFieldEventTypes) => void;
-  income: {
-    name: string;
-    incomeType: IncomeType;
-    amount: number;
-    occurrencesDay: number;
-    occurrencesMonths: number[];
-  };
-}
-
-const IncomeFields: React.FC<IncomeFieldsProps> = (props) => {
-  const classes = useStyles();
-
-  const { index, income, handleIncomeInputDataChange, handleTextFieldChange } = props;
-
-  return (
-    <div>
-      <FormControl className={classes.formControl}>
-        <InputLabel id="income-type-label">Income Type</InputLabel>
-        <Select
-          labelId="income-type-label"
-          name="incomeType"
-          label="Income Type"
-          value={income.incomeType}
-          onChange={e => {
-            handleIncomeInputDataChange(index, 'incomeType', e.target.value as string);
-          }}
-        >
-          <MenuItem disabled value="">Income Type</MenuItem>
-          <MenuItem value="SALARY">Salary</MenuItem>
-          <MenuItem value="THIRTEENTH_SALARY">Thirteenth Salary</MenuItem>
-          <MenuItem value="THIRTEENTH_SALARY_ADVANCE">Thirteenth Salary Advance</MenuItem>
-          <MenuItem value="PROFIT_SHARING">Profit Sharing</MenuItem>
-          <MenuItem value="OTHER">Other</MenuItem>
-        </Select>
-      </FormControl>
-      <TextField
-        label="Income Name"
-        className={classes.textField}
-        value={income.name}
-        name="name"
-        onChange={handleTextFieldChange(index)}
-      />
-      <TextField
-        label="Amount"
-        className={classes.textField}
-        value={income.amount}
-        onChange={handleTextFieldChange(index)}
-        name="amount"
-        InputProps={{
-          inputComponent: MoneyFormat as any,
-        }} />
-      <TextField
-        label="Occurrence Day"
-        className={classes.textField}
-        type="number"
-        placeholder="1-31"
-        value={income.occurrencesDay}
-        onChange={handleTextFieldChange(index)}
-        name="occurrencesDay"
-      />
-      <FormControl className={classes.formControl}>
-        <InputLabel id={`occurrences-months-${index}`}>Months</InputLabel>
-        <Select
-          labelId={`occurrences-months-${index}`}
-          value={income.occurrencesMonths}
-          className={classes.selectField}
-          name="occurrencesMonths"
-          onChange={handleTextFieldChange(index)}
-          multiple
-        >
-          <MenuItem disabled value="">Select Months</MenuItem>
-          <MenuItem value={1}>January</MenuItem>
-          <MenuItem value={2}>February</MenuItem>
-          <MenuItem value={3}>Mars</MenuItem>
-          <MenuItem value={4}>April</MenuItem>
-          <MenuItem value={5}>May</MenuItem>
-          <MenuItem value={6}>June</MenuItem>
-          <MenuItem value={7}>July</MenuItem>
-          <MenuItem value={8}>August</MenuItem>
-          <MenuItem value={9}>September</MenuItem>
-          <MenuItem value={10}>October</MenuItem>
-          <MenuItem value={11}>November</MenuItem>
-          <MenuItem value={12}>December</MenuItem>
-        </Select>
-      </FormControl>
-      <IconButton className={classes.deleteButton} aria-label="delete"><DeleteIcon /></IconButton>
-    </div>
-  )
-};
-
 interface IncomeFormProps {
   inputData: NewFinancialContractForm;
   handleInputDataChange: (key: string, value: string | Date | NewIncomeForm[]) => void;
   handleIncomeInputDataChange: HandleIncomeInputDataChange;
   handleDiscountInputDataChange: HandleDiscountInputDataChange;
+  handleRemoveIncome: (index: number) => void;
+  handleRemoveIncomeDiscount: (ii: number, di: number) => void;
+  handleAddIncome: () => void;
+  handleAddDiscountIncome: (incomeIndex: number) => void;
 }
 
 const IncomeForm: React.FC<IncomeFormProps> = (props) => {
@@ -275,11 +185,78 @@ const IncomeForm: React.FC<IncomeFormProps> = (props) => {
           return (
             <div key={ii}>
               <Grid item xs={12}>
-                <IncomeFields
-                  index={ii}
-                  handleIncomeInputDataChange={props.handleIncomeInputDataChange}
-                  handleTextFieldChange={handleIncomeTextFieldChange}
-                  income={income} />
+                <FormControl className={classes.formControl}>
+                  <InputLabel id="income-type-label">Income Type</InputLabel>
+                  <Select
+                    labelId="income-type-label"
+                    name="incomeType"
+                    label="Income Type"
+                    value={income.incomeType}
+                    onChange={handleIncomeTextFieldChange(ii)}
+                  >
+                    <MenuItem disabled value="">Income Type</MenuItem>
+                    <MenuItem value="SALARY">Salary</MenuItem>
+                    <MenuItem value="THIRTEENTH_SALARY">Thirteenth Salary</MenuItem>
+                    <MenuItem value="THIRTEENTH_SALARY_ADVANCE">Thirteenth Salary Advance</MenuItem>
+                    <MenuItem value="PROFIT_SHARING">Profit Sharing</MenuItem>
+                    <MenuItem value="OTHER">Other</MenuItem>
+                  </Select>
+                </FormControl>
+                <TextField
+                  label="Income Name"
+                  className={classes.textField}
+                  value={income.name}
+                  name="name"
+                  onChange={handleIncomeTextFieldChange(ii)}
+                />
+                <TextField
+                  label="Amount"
+                  className={classes.textField}
+                  value={income.amount}
+                  onChange={handleIncomeTextFieldChange(ii)}
+                  name="amount"
+                  InputProps={{
+                    inputComponent: MoneyFormat as any,
+                  }} />
+                <TextField
+                  label="Occurrence Day"
+                  className={classes.textField}
+                  type="number"
+                  placeholder="1-31"
+                  value={income.occurrencesDay}
+                  onChange={handleIncomeTextFieldChange(ii)}
+                  name="occurrencesDay"
+                />
+                <FormControl className={classes.formControl}>
+                  <InputLabel id={`occurrences-months-${ii}`}>Months</InputLabel>
+                  <Select
+                    labelId={`occurrences-months-${ii}`}
+                    value={income.occurrencesMonths}
+                    className={classes.selectField}
+                    name="occurrencesMonths"
+                    onChange={handleIncomeTextFieldChange(ii)}
+                    multiple
+                  >
+                    <MenuItem disabled value="">Select Months</MenuItem>
+                    <MenuItem value={1}>January</MenuItem>
+                    <MenuItem value={2}>February</MenuItem>
+                    <MenuItem value={3}>Mars</MenuItem>
+                    <MenuItem value={4}>April</MenuItem>
+                    <MenuItem value={5}>May</MenuItem>
+                    <MenuItem value={6}>June</MenuItem>
+                    <MenuItem value={7}>July</MenuItem>
+                    <MenuItem value={8}>August</MenuItem>
+                    <MenuItem value={9}>September</MenuItem>
+                    <MenuItem value={10}>October</MenuItem>
+                    <MenuItem value={11}>November</MenuItem>
+                    <MenuItem value={12}>December</MenuItem>
+                  </Select>
+                </FormControl>
+                <IconButton
+                  className={classes.deleteButton}
+                  aria-label="delete"
+                  onClick={() => props.handleRemoveIncome(ii)}
+                ><DeleteIcon /></IconButton>
               </Grid>
               {income.discounts.map((discount, di) => {
                 return (
@@ -317,7 +294,11 @@ const IncomeForm: React.FC<IncomeFormProps> = (props) => {
                         inputComponent: MoneyFormat as any,
                       }}
                     />
-                    <IconButton className={classes.deleteButton} aria-label="delete"><DeleteIcon /></IconButton>
+                    <IconButton
+                      className={classes.deleteButton}
+                      aria-label="delete"
+                      onClick={() => props.handleRemoveIncomeDiscount(ii, di)}
+                    ><DeleteIcon /></IconButton>
                   </Grid>
                 );
               })}
@@ -327,6 +308,7 @@ const IncomeForm: React.FC<IncomeFormProps> = (props) => {
                   color="default"
                   className={classes.addButton}
                   startIcon={<AddCircleIcon />}
+                  onClick={() => props.handleAddDiscountIncome(ii)}
                 >Add Discount</Button>
               </Grid>
             </div>
@@ -339,6 +321,7 @@ const IncomeForm: React.FC<IncomeFormProps> = (props) => {
           color="default"
           className={classes.addButton}
           startIcon={<AddCircleIcon />}
+          onClick={props.handleAddIncome}
         >
           Add Income
         </Button>

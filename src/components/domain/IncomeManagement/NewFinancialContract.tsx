@@ -37,6 +37,10 @@ function getStepContent(
 	handleFormData: (key: string, value: IncomeContentTypes) => void,
 	handleIncomeInputDataChange: (index: number, key: string, value: string) => void,
 	handleDiscountInputDataChange: (incomeIndex: number, discountIndex: number, key: string, value: string) => void,
+	handleRemoveIncome: (index: number) => void,
+	handleRemoveIncomeDiscount: (ii: number, di: number) => void,
+	handleAddIncome: () => void,
+	handleAddDiscountIncome: (incomeIndex: number) => void,
 ) {
 	switch (stepIndex) {
 		case 0:
@@ -47,6 +51,10 @@ function getStepContent(
 				handleInputDataChange={handleFormData}
 				handleIncomeInputDataChange={handleIncomeInputDataChange}
 				handleDiscountInputDataChange={handleDiscountInputDataChange}
+				handleRemoveIncome={handleRemoveIncome}
+				handleRemoveIncomeDiscount={handleRemoveIncomeDiscount}
+				handleAddIncome={handleAddIncome}
+				handleAddDiscountIncome={handleAddDiscountIncome}
 			/>;
 		case 2:
 			return <Review />;
@@ -146,6 +154,65 @@ const NewFinancialContract: React.FC<RouteComponentProps> = () => {
 		})
 	};
 
+	const handleRemoveIncome = (index: number) => {
+		setFormData({
+			...formData,
+			incomes: formData.incomes.filter((_, i) => i !== index),
+		});
+	};
+
+	const handleAddIncome = () => {
+		const newIncome = {
+			amount: 0,
+			incomeType: IncomeType.SALARY,
+			name: "",
+			occurrencesDay: 5,
+			occurrencesMonths: [],
+			discounts: [],
+		} as NewIncomeForm;
+
+		setFormData({
+			...formData,
+			incomes: [
+				...formData.incomes,
+				newIncome,
+			]
+		})
+	};
+
+	const handleRemoveIncomeDiscount = (incomeIndex: number, discountIndex: number) => {
+		const updatedIncome = {
+			...formData.incomes[incomeIndex],
+			discounts: formData.incomes[incomeIndex].discounts.filter((_, i) => i !== discountIndex),
+		};
+
+		setFormData({
+			...formData,
+			incomes: formData.incomes.map((income, i) => i === incomeIndex? updatedIncome : income),
+		});
+	};
+
+	const handleAddDiscountIncome = (incomeIndex: number) => {
+		const newIncomeDiscount = {
+			amount: 0,
+			discountType: DiscountType.OTHER,
+			name: "",
+		} as NewIncomeDiscountForm;
+
+		const updatedIncome = {
+			...formData.incomes[incomeIndex],
+			discounts: [
+				...formData.incomes[incomeIndex].discounts,
+				newIncomeDiscount,
+			]
+		};
+
+		setFormData({
+			...formData,
+			incomes: formData.incomes.map((income, i) => i === incomeIndex? updatedIncome : income),
+		})
+	};
+
 	return (
 		<AuthenticatedPage>
 			<form className={classes.cardRoot} noValidate autoComplete="off">
@@ -173,7 +240,11 @@ const NewFinancialContract: React.FC<RouteComponentProps> = () => {
 										formData,
 										handleFormDataChange,
 										handleIncomeInputDataChange,
-										handleIncomeDiscountInputDataChange
+										handleIncomeDiscountInputDataChange,
+										handleRemoveIncome,
+										handleRemoveIncomeDiscount,
+										handleAddIncome,
+										handleAddDiscountIncome,
 									)}
 								</div>
 								<div>

@@ -10,6 +10,7 @@ export enum IncomeType {
 
 export enum DiscountType {
   INSS = "INSS",
+  OTHER = "OTHER",
 }
 
 export interface Occurrences {
