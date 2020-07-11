@@ -6,7 +6,7 @@ import {makeStyles} from '@material-ui/core/styles';
 import ContractForm from "./Forms/ContractForm";
 import IncomeForm from "./Forms/IncomeForm";
 import Review from "./Forms/Review";
-import {ContractType, NewFinancialContractInput, NewIncomeInput} from "./types";
+import {ContractType, DiscountType, IncomeType} from "./types";
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
 	cardRoot: {
@@ -29,13 +29,14 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 	})
 );
 
-type IncomeContentTypes = string | Date | NewIncomeInput[];
+type IncomeContentTypes = string | Date | NewIncomeForm[];
 
 function getStepContent(
 	stepIndex: Number,
-	formData: NewFinancialContractInput,
+	formData: NewFinancialContractForm,
 	handleFormData: (key: string, value: IncomeContentTypes) => void,
-	handleIncomeInputDataChange: (index: number, key: string, value: string) => void
+	handleIncomeInputDataChange: (index: number, key: string, value: string) => void,
+	handleDiscountInputDataChange: (incomeIndex: number, discountIndex: number, key: string, value: string) => void,
 ) {
 	switch (stepIndex) {
 		case 0:
@@ -44,21 +45,50 @@ function getStepContent(
 			return <IncomeForm
 				inputData={formData}
 				handleInputDataChange={handleFormData}
-				handleIncomeInputDataChange={handleIncomeInputDataChange} />;
+				handleIncomeInputDataChange={handleIncomeInputDataChange}
+				handleDiscountInputDataChange={handleDiscountInputDataChange}
+			/>;
 		case 2:
 			return <Review />;
 	}
 }
 
+export interface NewIncomeDiscountForm {
+	name: string;
+	amount: number;
+	discountType: DiscountType;
+}
+
+export interface NewIncomeForm {
+	name: string;
+	amount: number;
+	incomeType: IncomeType;
+	occurrencesDay: number;
+	occurrencesMonths: number[];
+	discounts: NewIncomeDiscountForm[];
+}
+
+export interface NewFinancialContractForm {
+	name: string;
+	contractType: ContractType;
+	companyCnpj?: string;
+	startDate: Date;
+	endDate?: Date;
+	incomes: NewIncomeForm[];
+	grossSalary: number;
+	dependentsQuantity: number;
+	deductions: number;
+}
+
 const NewFinancialContract: React.FC<RouteComponentProps> = () => {
 	const classes = useStyles();
 
-	const [formData, setFormData] = React.useState<NewFinancialContractInput>({
+	const [formData, setFormData] = React.useState<NewFinancialContractForm>({
 		contractType: ContractType.CLT,
 		name: "",
 		startDate: new Date(),
 		incomes: [],
-		grossSalary: 2000.13,
+		grossSalary: 14999.99,
 		dependentsQuantity: 0,
 		deductions: 0,
 	});
@@ -89,7 +119,7 @@ const NewFinancialContract: React.FC<RouteComponentProps> = () => {
 		})
 	};
 
-	const handleIncomeInputDataChange = (index: number, key: string, value: string) => {
+	const handleIncomeInputDataChange = (index: number, key: string, value: any) => {
 		const updatedIncome = {
 			...formData.incomes[index],
 			[key]: value,
@@ -98,6 +128,21 @@ const NewFinancialContract: React.FC<RouteComponentProps> = () => {
 		setFormData({
 			...formData,
 			incomes: formData.incomes.map((income, i) => i === index? updatedIncome : income)
+		})
+	};
+
+	const handleIncomeDiscountInputDataChange = (incomeIndex: number, discountIndex: number, key: string, value: any) => {
+		const updatedDiscount = {
+			...formData.incomes[incomeIndex].discounts[discountIndex],
+			[key]: value,
+		};
+
+		setFormData({
+			...formData,
+			incomes: formData.incomes.map((income, ii) => ii === incomeIndex? {
+				...income,
+				discounts: income.discounts.map((discount, di) => di === discountIndex? updatedDiscount : discount)
+			} : income)
 		})
 	};
 
@@ -123,7 +168,13 @@ const NewFinancialContract: React.FC<RouteComponentProps> = () => {
 						) : (
 							<div>
 								<div className={classes.instructions}>
-									{getStepContent(activeStep, formData, handleFormDataChange, handleIncomeInputDataChange)}
+									{getStepContent(
+										activeStep,
+										formData,
+										handleFormDataChange,
+										handleIncomeInputDataChange,
+										handleIncomeDiscountInputDataChange
+									)}
 								</div>
 								<div>
 									<Button

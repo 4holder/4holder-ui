@@ -11,13 +11,16 @@ import {
   Select,
   TextField,
   Theme,
+  Typography,
 } from "@material-ui/core";
 import DeleteIcon from '@material-ui/icons/Delete';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import {makeStyles} from "@material-ui/core/styles";
 import MoneyFormat from "../../../common/NumberFormat/MoneyFormat";
-import {NewFinancialContractInput, NewIncomeInput} from "../types";
-import {calculateBaseCLTContract, CLTContractResponse} from "../../../../clients/publicApiClient";
+import {Amount, DiscountType, IncomeType, Occurrences} from "../types";
+import {NewFinancialContractForm, NewIncomeForm} from "../NewFinancialContract";
+import gql from "graphql-tag";
+import {useQuery} from "@apollo/react-hooks";
 
 const fieldWidth = 230;
 
@@ -51,11 +54,13 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
   },
 }));
 
-interface IncomeFormProps {
-  inputData: NewFinancialContractInput;
-  handleInputDataChange: (key: string, value: string | Date | NewIncomeInput[]) => void
-  handleIncomeInputDataChange: (index: number, key: string, value: string) => void
-}
+type HandleIncomeInputDataChange = (index: number, key: string, value: string) => void;
+
+type EditableFieldEventTypes =
+  React.ChangeEvent<{ name?: string; value: unknown; }>
+  | React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>;
+
+type HandleDiscountInputDataChange = (incomeIndex: number, discountIndex: number, key: string, value: string) => void;
 
 
 const sanitizeMonetaryValue = (value: string | number) => {
@@ -66,109 +71,226 @@ const sanitizeNumber = (value: number) => {
   return parseInt(value.toString());
 };
 
+interface CLTContract  {
+  contract: {
+    grossSalary: {
+      amount: Amount;
+    }
+    incomes: {
+      name: string;
+      incomeType: IncomeType;
+      occurrences: Occurrences;
+      amount: Amount;
+      discounts: {
+        discountType: DiscountType;
+        amount: Amount;
+      }[];
+    }[];
+  };
+}
+
+export const CALCULATE_BASE_CLT_CONTRACT = gql`
+query(
+    $grossSalaryInCents: Int!, 
+    $dependentsQuantity: Int!,
+    $deductionsInCents: Int!) {
+  contract: baseCLTContract(
+    grossSalaryInCents: $grossSalaryInCents, 
+    dependentsQuantity: $dependentsQuantity,
+    deductionsInCents: $deductionsInCents
+  ) {
+    grossSalary {
+      amount: valueInCents
+    }
+    incomes {
+      name
+      incomeType
+      occurrences {
+        day
+        months
+      }
+      amount {
+        amount: valueInCents
+      }
+      discounts {
+        discountType
+        amount {
+          amount: valueInCents
+        }
+      }
+    }
+  }
+}
+`;
+
+interface IncomeFieldsProps {
+  index: number;
+  handleIncomeInputDataChange: HandleIncomeInputDataChange;
+  handleTextFieldChange: (index: number) => (e: EditableFieldEventTypes) => void;
+  income: {
+    name: string;
+    incomeType: IncomeType;
+    amount: number;
+    occurrencesDay: number;
+    occurrencesMonths: number[];
+  };
+}
+
+const IncomeFields: React.FC<IncomeFieldsProps> = (props) => {
+  const classes = useStyles();
+
+  const { index, income, handleIncomeInputDataChange, handleTextFieldChange } = props;
+
+  return (
+    <div>
+      <FormControl className={classes.formControl}>
+        <InputLabel id="income-type-label">Income Type</InputLabel>
+        <Select
+          labelId="income-type-label"
+          name="incomeType"
+          label="Income Type"
+          value={income.incomeType}
+          onChange={e => {
+            handleIncomeInputDataChange(index, 'incomeType', e.target.value as string);
+          }}
+        >
+          <MenuItem disabled value="">Income Type</MenuItem>
+          <MenuItem value="SALARY">Salary</MenuItem>
+          <MenuItem value="THIRTEENTH_SALARY">Thirteenth Salary</MenuItem>
+          <MenuItem value="THIRTEENTH_SALARY_ADVANCE">Thirteenth Salary Advance</MenuItem>
+          <MenuItem value="PROFIT_SHARING">Profit Sharing</MenuItem>
+          <MenuItem value="OTHER">Other</MenuItem>
+        </Select>
+      </FormControl>
+      <TextField
+        label="Income Name"
+        className={classes.textField}
+        value={income.name}
+        name="name"
+        onChange={handleTextFieldChange(index)}
+      />
+      <TextField
+        label="Amount"
+        className={classes.textField}
+        value={income.amount}
+        onChange={handleTextFieldChange(index)}
+        name="amount"
+        InputProps={{
+          inputComponent: MoneyFormat as any,
+        }} />
+      <TextField
+        label="Occurrence Day"
+        className={classes.textField}
+        type="number"
+        placeholder="1-31"
+        value={income.occurrencesDay}
+        onChange={handleTextFieldChange(index)}
+        name="occurrencesDay"
+      />
+      <FormControl className={classes.formControl}>
+        <InputLabel id={`occurrences-months-${index}`}>Months</InputLabel>
+        <Select
+          labelId={`occurrences-months-${index}`}
+          value={income.occurrencesMonths}
+          className={classes.selectField}
+          name="occurrencesMonths"
+          onChange={handleTextFieldChange(index)}
+          multiple
+        >
+          <MenuItem disabled value="">Select Months</MenuItem>
+          <MenuItem value={1}>January</MenuItem>
+          <MenuItem value={2}>February</MenuItem>
+          <MenuItem value={3}>Mars</MenuItem>
+          <MenuItem value={4}>April</MenuItem>
+          <MenuItem value={5}>May</MenuItem>
+          <MenuItem value={6}>June</MenuItem>
+          <MenuItem value={7}>July</MenuItem>
+          <MenuItem value={8}>August</MenuItem>
+          <MenuItem value={9}>September</MenuItem>
+          <MenuItem value={10}>October</MenuItem>
+          <MenuItem value={11}>November</MenuItem>
+          <MenuItem value={12}>December</MenuItem>
+        </Select>
+      </FormControl>
+      <IconButton className={classes.deleteButton} aria-label="delete"><DeleteIcon /></IconButton>
+    </div>
+  )
+};
+
+interface IncomeFormProps {
+  inputData: NewFinancialContractForm;
+  handleInputDataChange: (key: string, value: string | Date | NewIncomeForm[]) => void;
+  handleIncomeInputDataChange: HandleIncomeInputDataChange;
+  handleDiscountInputDataChange: HandleDiscountInputDataChange;
+}
+
 const IncomeForm: React.FC<IncomeFormProps> = (props) => {
   const classes = useStyles();
 
-  const updateBaseCLTContract = () => {
-    calculateBaseCLTContract(
-      sanitizeMonetaryValue(props.inputData.grossSalary),
-      sanitizeNumber(props.inputData.dependentsQuantity),
-      sanitizeMonetaryValue(props.inputData.deductions),
-    ).then((response: CLTContractResponse) => {
-      props.handleInputDataChange('incomes', response.incomes);
-    });
-  };
+  const { loading, data: contractData } = useQuery<CLTContract>(CALCULATE_BASE_CLT_CONTRACT, {
+    variables: {
+      grossSalaryInCents: sanitizeMonetaryValue(props.inputData.grossSalary),
+      dependentsQuantity: sanitizeNumber(props.inputData.dependentsQuantity),
+      deductionsInCents: sanitizeMonetaryValue(props.inputData.deductions),
+    },
+  });
 
   useEffect(() => {
-    updateBaseCLTContract();
-  }, []);
+    props.handleInputDataChange('incomes', contractData ? contractData.contract.incomes.map(income => ({
+      name: income.name,
+      amount: income.amount.amount/100,
+      incomeType: income.incomeType,
+      occurrencesDay: income.occurrences.day,
+      occurrencesMonths: income.occurrences.months,
+      discounts: income.discounts.map(discount => ({
+        name: discount.discountType,
+        amount: discount.amount.amount/100,
+        discountType: discount.discountType,
+      })),
+    })) : []);
+  }, [contractData]);
 
-  const handleTextFieldChange = (index: number) => (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-    props.handleIncomeInputDataChange(index, e.target.name, e.target.value as string);
+  const handleIncomeTextFieldChange = (index: number) => (e: EditableFieldEventTypes) => {
+    const fieldName = e.target.name as string;
+    const fieldValue = e.target.value as any;
+
+    props.handleIncomeInputDataChange(index, fieldName, fieldValue);
   };
+
+  const handleDiscountTextFieldChange = (incomeIndex: number, discountIndex: number) => (e: EditableFieldEventTypes) => {
+    const fieldName = e.target.name as string;
+    const fieldValue = e.target.value as any;
+
+    props.handleDiscountInputDataChange(incomeIndex, discountIndex, fieldName, fieldValue);
+  };
+
+  if (loading) {
+    return (<Typography>Loading..</Typography>);
+  }
 
   return (
     <Grid container>
       <Paper>
-        {props.inputData.incomes.map((income, index) => {
+        {props.inputData.incomes.map((income, ii) => {
           return (
-            <div key={index}>
+            <div key={ii}>
               <Grid item xs={12}>
-                <FormControl className={classes.formControl}>
-                  <InputLabel id="income-type-label">Income Type</InputLabel>
-                  <Select
-                    labelId="income-type-label"
-                    name="incomeType"
-                    label="Income Type"
-                    value={income.incomeType}
-                    onChange={e => {
-                      props.handleIncomeInputDataChange(index, 'incomeType', e.target.value as string);
-                    }}
-                  >
-                    <MenuItem disabled value="">Income Type</MenuItem>
-                    <MenuItem value="SALARY">Salary</MenuItem>
-                    <MenuItem value="THIRTEENTH_SALARY">Thirteenth Salary</MenuItem>
-                    <MenuItem value="THIRTEENTH_SALARY_ADVANCE">Thirteenth Salary Advance</MenuItem>
-                    <MenuItem value="PROFIT_SHARING">Profit Sharing</MenuItem>
-                    <MenuItem value="OTHER">Other</MenuItem>
-                  </Select>
-                </FormControl>
-                <TextField
-                  label="Income Name"
-                  className={classes.textField}
-                  value={income.name}
-                  name="name"
-                  onChange={handleTextFieldChange(index)}
-                />
-                <TextField
-                  label="Amount"
-                  className={classes.textField}
-                  value={income.amount.amount/100}
-                  onChange={handleTextFieldChange(index)}
-                  InputProps={{
-                    inputComponent: MoneyFormat as any,
-                  }} />
-                <TextField
-                  label="Occurrence Day"
-                  className={classes.textField}
-                  type="number"
-                  placeholder="1-31"
-                  value={income.occurrences.day}
-                  name="occurrencesDay"
-                />
-                <FormControl className={classes.formControl}>
-                  <InputLabel id={`occurrences-months-1`}>Months</InputLabel>
-                  <Select
-                    labelId={`occurrences-months-1`}
-                    value={income.occurrences.months}
-                    className={classes.selectField}
-                    multiple
-                  >
-                    <MenuItem disabled value="">Select Months</MenuItem>
-                    <MenuItem value={1}>January</MenuItem>
-                    <MenuItem value={2}>February</MenuItem>
-                    <MenuItem value={3}>Mars</MenuItem>
-                    <MenuItem value={4}>April</MenuItem>
-                    <MenuItem value={5}>May</MenuItem>
-                    <MenuItem value={6}>June</MenuItem>
-                    <MenuItem value={7}>July</MenuItem>
-                    <MenuItem value={8}>August</MenuItem>
-                    <MenuItem value={9}>September</MenuItem>
-                    <MenuItem value={10}>October</MenuItem>
-                    <MenuItem value={11}>November</MenuItem>
-                    <MenuItem value={12}>December</MenuItem>
-                  </Select>
-                </FormControl>
-                <IconButton className={classes.deleteButton} aria-label="delete"><DeleteIcon /></IconButton>
+                <IncomeFields
+                  index={ii}
+                  handleIncomeInputDataChange={props.handleIncomeInputDataChange}
+                  handleTextFieldChange={handleIncomeTextFieldChange}
+                  income={income} />
               </Grid>
-              {income.discounts.map((discount, index) => {
+              {income.discounts.map((discount, di) => {
                 return (
-                  <Grid item className={classes.discounts} xs={12} key={index}>
+                  <Grid item className={classes.discounts} xs={12} key={di}>
                     <FormControl className={classes.formControl}>
-                      <InputLabel id={`discount-type-${index}`}>Discount Type</InputLabel>
+                      <InputLabel id={`discount-type-${di}`}>Discount Type</InputLabel>
                       <Select
-                        labelId={`discount-type-${index}`}
+                        labelId={`discount-type-${di}`}
                         value={discount.discountType}
+                        onChange={handleDiscountTextFieldChange(ii, di)}
+                        name="discountType"
                       >
                         <MenuItem disabled value="">Discount Type</MenuItem>
                         <MenuItem value="INSS">INSS</MenuItem>
@@ -181,14 +303,15 @@ const IncomeForm: React.FC<IncomeFormProps> = (props) => {
                     </FormControl>
                     <TextField
                       label="Discount Name"
-                      name={`discount-name-${index}`}
                       value={discount.name || discount.discountType}
+                      name="name"
+                      onChange={handleDiscountTextFieldChange(ii, di)}
                       className={classes.textField} />
                     <TextField
-                      label="Value"
-                      placeholder="Value"
-                      name={`discount-value-${index}`}
-                      value={discount.amount.amount/100}
+                      label="Amount"
+                      name="amount"
+                      value={discount.amount}
+                      onChange={handleDiscountTextFieldChange(ii, di)}
                       className={classes.textField}
                       InputProps={{
                         inputComponent: MoneyFormat as any,
@@ -198,19 +321,17 @@ const IncomeForm: React.FC<IncomeFormProps> = (props) => {
                   </Grid>
                 );
               })}
+              <Grid item xs={12} className={classes.discounts}>
+                <Button
+                  variant="contained"
+                  color="default"
+                  className={classes.addButton}
+                  startIcon={<AddCircleIcon />}
+                >Add Discount</Button>
+              </Grid>
             </div>
           );
         })}
-        <Grid item xs={12} className={classes.discounts}>
-          <Button
-            variant="contained"
-            color="default"
-            className={classes.addButton}
-            startIcon={<AddCircleIcon />}
-          >
-            Add Discount
-          </Button>
-        </Grid>
       </Paper>
       <Grid item xs={12}>
         <Button

@@ -41,27 +41,27 @@ export interface FinancialMovementsProjection {
   financialMovements: ProjectionPoint[];
 }
 
-export interface NewIncomeDiscountInput {
+export interface IncomeDiscount {
   name: string;
   amount: Amount;
   discountType: DiscountType;
 }
 
-export interface NewIncomeInput {
+export interface Income {
   name: string;
   amount: Amount;
   incomeType: IncomeType;
   occurrences: Occurrences;
-  discounts: NewIncomeDiscountInput[];
+  discounts: IncomeDiscount[];
 }
 
-export interface NewFinancialContractInput {
+export interface FinancialContract {
   name: string;
   contractType: ContractType;
   companyCnpj?: string;
   startDate: Date;
   endDate?: Date;
-  incomes: NewIncomeInput[];
+  incomes: Income[];
   grossSalary: number;
   dependentsQuantity: number;
   deductions: number;

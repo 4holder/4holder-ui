@@ -7,8 +7,6 @@ import { createHttpLink } from 'apollo-link-http';
 import auth from "../auth/auth";
 import config from "../config";
 import {
-  Amount,
-  DiscountType,
   FinancialMovementsProjection, IncomeType, Occurrences,
   ProjectionPoint
 } from "../components/domain/IncomeManagement/types";
@@ -28,7 +26,7 @@ const authLink = setContext((_, { headers }) => {
   }
 });
 
-const client = new ApolloClient({
+export const apolloClient = new ApolloClient({
   link: authLink.concat(httpLink),
   cache: new InMemoryCache()
 });
@@ -41,7 +39,7 @@ export interface UserProfile {
 }
 
 export const getUserProfile: () => Promise<UserProfile> = () => {
-  return client
+  return apolloClient
     .query({
       query: gql`
       {
@@ -56,40 +54,6 @@ export const getUserProfile: () => Promise<UserProfile> = () => {
     })
     .then(result => result.data.userProfile);
 };
-
-export const CALCULATE_BASE_CLT_CONTRACT = gql`
-query(
-    $grossSalaryInCents: Int!, 
-    $dependentsQuantity: Int!,
-    $deductionsInCents: Int!) {
-  baseCLTContract(
-    grossSalaryInCents: $grossSalaryInCents, 
-    dependentsQuantity: $dependentsQuantity,
-    deductionsInCents: $deductionsInCents
-  ) {
-    grossSalary {
-      amount: valueInCents
-    }
-    incomes {
-      name
-      incomeType
-      occurrences {
-        day
-        months
-      }
-      amount {
-        amount: valueInCents
-      }
-      discounts {
-        discountType
-        amount {
-          amount: valueInCents
-        }
-      }
-    }
-  }
-}
-`;
 
 export const GET_FINANCIAL_CONTRACTS_QUERY = gql`
 query($page: Int!, $pageSize: Int!) {
@@ -128,50 +92,8 @@ query($page: Int!, $pageSize: Int!) {
 }
 `;
 
-export interface IncomeDiscountResponse {
-  name: string;
-  amount: Amount;
-  discountType: DiscountType;
-}
-
-export interface IncomeResponse {
-  name: string;
-  amount: Amount;
-  incomeType: IncomeType;
-  occurrences: Occurrences;
-  discounts: IncomeDiscountResponse[];
-}
-
-export interface CLTContractResponse {
-  incomes: IncomeResponse[];
-}
-
-export const calculateBaseCLTContract = (
-  grossSalaryInCents: number,
-  dependentsQuantity: number,
-  deductionsInCents: number
-) => {
-  type Variables = {
-    grossSalaryInCents: number;
-    dependentsQuantity: number;
-    deductionsInCents: number;
-  }
-  const variables = {
-    grossSalaryInCents,
-    dependentsQuantity,
-    deductionsInCents,
-  } as Variables;
-
-  return client
-    .query({
-      query: CALCULATE_BASE_CLT_CONTRACT,
-      variables
-    } as QueryOptions<Variables>)
-    .then(result => result.data.baseCLTContract);
-};
-
 export const importAuth0User: () => Promise<UserProfile> = async () => {
-  return client
+  return apolloClient
     .mutate({
       mutation: gql`
       mutation importAuth0User {
@@ -194,7 +116,7 @@ export const getIncomeResumes = (page: number, pageSize: number) => {
     pageSize,
   } as Variables;
 
-  return client
+  return apolloClient
     .query({
       query: GET_FINANCIAL_CONTRACTS_QUERY,
       variables
@@ -212,7 +134,7 @@ export const getIncomeProjections = (page: number = 1, pageSize: number = 100) =
     pageSize,
   } as Variables;
 
-  return client
+  return apolloClient
     .query({
       query: GET_PROJECTIONS_QUERY,
       variables

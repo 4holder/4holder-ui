@@ -5,8 +5,8 @@ import MoneyFormat from "../../../common/NumberFormat/MoneyFormat";
 import MomentUtils from '@date-io/moment';
 import {KeyboardDatePicker, MuiPickersUtilsProvider} from "@material-ui/pickers";
 import {MaterialUiPickersDate} from "@material-ui/pickers/typings/date";
-import {NewFinancialContractInput} from "../types";
 import CNPJFormat from "../../../common/NumberFormat/CNPJFormat";
+import {NewFinancialContractForm} from "../NewFinancialContract";
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
     formControl: {
@@ -21,7 +21,7 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 );
 
 interface ContractFormProps {
-  inputData: NewFinancialContractInput;
+  inputData: NewFinancialContractForm;
   handleInputDataChange: (key: string, value: string | Date) => void
 }
 
