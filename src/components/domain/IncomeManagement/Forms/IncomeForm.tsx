@@ -145,6 +145,7 @@ const IncomeForm: React.FC<IncomeFormProps> = (props) => {
     },
   });
 
+
   useEffect(() => {
     props.handleInputDataChange('incomes', contractData ? contractData.contract.incomes.map(income => ({
       name: income.name,
@@ -158,7 +159,8 @@ const IncomeForm: React.FC<IncomeFormProps> = (props) => {
         discountType: discount.discountType,
       })),
     })) : []);
-  });
+  // eslint-disable-next-line
+  }, [contractData]);
 
   const handleIncomeTextFieldChange = (index: number) => (e: EditableFieldEventTypes) => {
     const fieldName = e.target.name as string;
