@@ -158,7 +158,7 @@ const IncomeForm: React.FC<IncomeFormProps> = (props) => {
         discountType: discount.discountType,
       })),
     })) : []);
-  }, [contractData]);
+  });
 
   const handleIncomeTextFieldChange = (index: number) => (e: EditableFieldEventTypes) => {
     const fieldName = e.target.name as string;

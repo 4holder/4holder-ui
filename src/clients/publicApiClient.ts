@@ -1,15 +1,12 @@
 import fetch from 'node-fetch';
 import {gql, InMemoryCache, QueryOptions} from 'apollo-boost';
 import ApolloClient from 'apollo-client';
-import { setContext } from 'apollo-link-context';
-import { createHttpLink } from 'apollo-link-http';
+import {setContext} from 'apollo-link-context';
+import {createHttpLink} from 'apollo-link-http';
 
 import auth from "../auth/auth";
 import config from "../config";
-import {
-  FinancialMovementsProjection, IncomeType, Occurrences,
-  ProjectionPoint
-} from "../components/domain/IncomeManagement/types";
+import {FinancialMovementsProjection, ProjectionPoint} from "../components/domain/IncomeManagement/types";
 
 // @ts-ignore
 const httpLink = createHttpLink({
