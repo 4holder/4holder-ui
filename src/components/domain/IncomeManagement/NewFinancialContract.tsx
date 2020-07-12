@@ -1,12 +1,14 @@
 import React from 'react';
-import {RouteComponentProps} from '@reach/router';
+import {navigate, RouteComponentProps} from '@reach/router';
 import {Button, createStyles, Grid, Step, StepLabel, Stepper, Theme, Typography,} from "@material-ui/core";
+import { useMutation } from "@apollo/react-hooks";
 import AuthenticatedPage from "../AuthenticatedPage";
 import {makeStyles} from '@material-ui/core/styles';
 import ContractForm from "./Forms/ContractForm";
 import IncomeForm from "./Forms/IncomeForm";
 import Review from "./Forms/Review";
 import {ContractType, DiscountType, IncomeType} from "./types";
+import {gql} from "apollo-boost";
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
 	cardRoot: {
@@ -57,7 +59,7 @@ function getStepContent(
 				handleAddDiscountIncome={handleAddDiscountIncome}
 			/>;
 		case 2:
-			return <Review />;
+			return <Review formData={formData} />;
 	}
 }
 
@@ -88,12 +90,52 @@ export interface NewFinancialContractForm {
 	deductions: number;
 }
 
+export const ADD_INCOME = gql`
+mutation RegisterNewFinancialContract($input: NewFinancialContractInput!) {
+	registerNewFinancialContract(input: $input) {
+		id
+	}
+}
+`;
+
+function mapToContractRegisterInput(formData: NewFinancialContractForm) {
+	return {
+		name: formData.name,
+		contractType: formData.contractType,
+		companyCnpj: formData.companyCnpj,
+		startDate: formData.startDate,
+		endDate: formData.endDate,
+		incomes: formData.incomes.map(income => ({
+			name: income.name,
+			incomeType: income.incomeType,
+			amount: {
+				valueInCents: parseInt((income.amount * 100).toString()),
+				currency: "BRL",
+			},
+			occurrences: {
+				day: income.occurrencesDay,
+				months: income.occurrencesMonths,
+			},
+			discounts: income.discounts.map(discount => ({
+				name: discount.name,
+				discountType: discount.discountType,
+				amount: {
+					valueInCents: parseInt((discount.amount * 100).toString()),
+					currency: "BRL",
+				},
+			})),
+		})),
+	};
+}
+
 const NewFinancialContract: React.FC<RouteComponentProps> = () => {
+	const [ registerNewFinancialContract ] = useMutation(ADD_INCOME);
 	const classes = useStyles();
 
 	const [formData, setFormData] = React.useState<NewFinancialContractForm>({
 		contractType: ContractType.CLT,
-		name: "",
+		companyCnpj: "00000000000000",
+		name: "A Co. Company",
 		startDate: new Date(),
 		incomes: [],
 		grossSalary: 14999.99,
@@ -101,7 +143,7 @@ const NewFinancialContract: React.FC<RouteComponentProps> = () => {
 		deductions: 0,
 	});
 
-	const [activeStep, setActiveStep] = React.useState(1);
+	const [activeStep, setActiveStep] = React.useState(0);
 	const steps = [
 		'Contract Information',
 		'Incomes & Discounts',
@@ -109,7 +151,15 @@ const NewFinancialContract: React.FC<RouteComponentProps> = () => {
 	];
 
 	const handleNext = () => {
-		setActiveStep((prevActiveStep) => prevActiveStep + 1);
+		if (activeStep === 2) {
+			registerNewFinancialContract({
+				variables: {
+					input: mapToContractRegisterInput(formData),
+				}
+			}).then(_ => navigate("/incomes"));
+		} else {
+			setActiveStep((prevActiveStep) => prevActiveStep + 1);
+		}
 	};
 
 	const handleBack = () => {
@@ -124,7 +174,7 @@ const NewFinancialContract: React.FC<RouteComponentProps> = () => {
 		setFormData({
 			...formData,
 			[key]: value,
-		})
+		});
 	};
 
 	const handleIncomeInputDataChange = (index: number, key: string, value: any) => {

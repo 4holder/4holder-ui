@@ -1,6 +1,8 @@
 import React from "react";
-import {Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@material-ui/core";
+import {Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
+import {NewFinancialContractForm} from "../NewFinancialContract";
+import Dinero from "dinero.js";
 
 const useStyles = makeStyles({
   cover: {
@@ -8,137 +10,93 @@ const useStyles = makeStyles({
   },
 });
 
-const Review: React.FC = () => {
+interface ReviewFormProps {
+  formData: NewFinancialContractForm;
+}
+
+const Review: React.FC<ReviewFormProps> = (props) => {
   const classes = useStyles();
+
+  const { formData } = props;
+
+  const toMonetaryVisualization = (amount: number) => {
+    return Dinero({
+      amount: parseInt((amount * 100).toString()),
+      currency: "BRL" }
+    ).toFormat();
+  };
 
   return (
     <TableContainer component={Paper} >
       <Table className={classes.cover}>
         <TableHead>
           <TableRow>
-            <TableCell colSpan={4}>Good Company that Pay You Out</TableCell>
+            <TableCell colSpan={4}>{formData.contractType} contract with {formData.name}</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           <TableRow>
             <TableCell>CNPJ</TableCell>
-            <TableCell colSpan={3}>82.913.562/0001-78</TableCell>
+            <TableCell colSpan={3}>{formData.companyCnpj}</TableCell>
           </TableRow>
           <TableRow>
             <TableCell>Start Date</TableCell>
-            <TableCell>02/03/2019</TableCell>
-            <TableCell colSpan={2}>Present Work</TableCell>
+            <TableCell>{formData.startDate.toDateString()}</TableCell>
+            {
+              formData.endDate?
+                <div>
+                  <TableCell>End Date</TableCell>
+                  <TableCell>{formData.endDate.toDateString()}</TableCell>
+                </div>
+              :
+                <TableCell colSpan={2}>Present</TableCell>
+            }
           </TableRow>
-          <TableRow>
-            <TableCell>Salary</TableCell>
-            <TableCell colSpan={3}>
-              <TableContainer>
-                <Table size="small" >
-                  <TableHead>
-                    <TableRow>
-                      <TableCell colSpan={3}>Income received every 5th of the month</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell>Gross Amount</TableCell>
-                      <TableCell colSpan={3}>R$ 3128,13</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell rowSpan={5}>Discounts</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>INSS</TableCell>
-                      <TableCell colSpan={2}>R$ 100,00</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>IRRF</TableCell>
-                      <TableCell colSpan={2}>R$ 300,00</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>MEALS</TableCell>
-                      <TableCell colSpan={2}>R$ 120,00</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell><b>Discounts Total</b></TableCell>
-                      <TableCell colSpan={2}><b>R$ 520,00</b></TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Net Amount</TableCell>
-                      <TableCell colSpan={2}>R$ 2739,88</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>Thirteen Salary Advance</TableCell>
-            <TableCell colSpan={3}>
-              <TableContainer>
-                <Table size="small" >
-                  <TableHead>
-                    <TableRow>
-                      <TableCell colSpan={3}>Income received every November 20th</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell>Gross Amount</TableCell>
-                      <TableCell colSpan={3}>R$ 3128,13</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Net Amount</TableCell>
-                      <TableCell colSpan={2}>R$ 2739,88</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>Thirteen Salary</TableCell>
-            <TableCell colSpan={3}>
-              <TableContainer>
-                <Table size="small" >
-                  <TableHead>
-                    <TableRow>
-                      <TableCell colSpan={3}>Income received every December 20th</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell>Gross Amount</TableCell>
-                      <TableCell colSpan={3}>R$ 3128,13</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell rowSpan={5}>Discounts</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>INSS</TableCell>
-                      <TableCell colSpan={2}>R$ 100,00</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>IRRF</TableCell>
-                      <TableCell colSpan={2}>R$ 300,00</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>MEALS</TableCell>
-                      <TableCell colSpan={2}>R$ 120,00</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell><b>Discounts Total</b></TableCell>
-                      <TableCell colSpan={2}><b>R$ 520,00</b></TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Net Amount</TableCell>
-                      <TableCell colSpan={2}>R$ 2739,88</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </TableCell>
-          </TableRow>
+          {formData.incomes.map((income, index) => {
+            return (
+              <TableRow key={index}>
+                <TableCell>{income.incomeType}</TableCell>
+                <TableCell colSpan={3}>
+                  <TableContainer>
+                    <Table size="small" >
+                      <TableHead>
+                        <TableRow>
+                          <TableCell colSpan={3}>
+                            {
+                              income.occurrencesMonths.length === 12?
+                                <Typography>Income is received every {income.occurrencesDay}th</Typography>
+                                :
+                                <Typography>
+                                  Income is received at {income.occurrencesDay}th
+                                   in month(s) {income.occurrencesMonths.join(",")}
+                                </Typography>
+                            }
+                          </TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell>Gross Amount</TableCell>
+                          <TableCell colSpan={3}>{toMonetaryVisualization(income.amount)}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell rowSpan={5}>Discounts</TableCell>
+                        </TableRow>
+                        {income.discounts.map((discount, index) => (
+                          <TableRow key={index}>
+                            <TableCell>{discount.discountType}</TableCell>
+                            <TableCell colSpan={2}>{toMonetaryVisualization(discount.amount)}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+
+
         </TableBody>
       </Table>
     </TableContainer>

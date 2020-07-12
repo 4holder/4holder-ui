@@ -1,5 +1,15 @@
-import React from "react";
-import {createStyles, FormControl, Grid, InputLabel, MenuItem, Select, TextField, Theme} from "@material-ui/core";
+import React, {useState} from "react";
+import {
+  Checkbox,
+  createStyles,
+  FormControl, FormControlLabel,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+  Theme
+} from "@material-ui/core";
 import {makeStyles} from "@material-ui/core/styles";
 import MoneyFormat from "../../../common/NumberFormat/MoneyFormat";
 import MomentUtils from '@date-io/moment';
@@ -17,6 +27,9 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
       margin: theme.spacing(1),
       minWidth: 320,
     },
+    checkbox: {
+      margin: theme.spacing(2),
+    }
   })
 );
 
@@ -29,6 +42,7 @@ const ContractForm: React.FC<ContractFormProps> = (props) => {
   const classes = useStyles();
 
   const { contractType } = props.inputData;
+  const [isCurrentContract, setIsCurrentContract] = useState(true);
 
   const handleDateChange = (fieldName: string, date: MaterialUiPickersDate) => {
     props.handleInputDataChange(fieldName, date ? date.toDate() : new Date());
@@ -103,7 +117,6 @@ const ContractForm: React.FC<ContractFormProps> = (props) => {
       <MuiPickersUtilsProvider utils={MomentUtils}>
         <Grid item xs={12}>
           <KeyboardDatePicker
-            disableToolbar
             variant="inline"
             format={"MMMM DD, yyyy"}
             label="Start Date"
@@ -116,18 +129,37 @@ const ContractForm: React.FC<ContractFormProps> = (props) => {
             }}
           />
 
-          <KeyboardDatePicker
-            disableToolbar
-            variant="inline"
-            format={"MMMM DD, yyyy"}
-            label="End Date"
-            value={props.inputData.endDate}
-            className={classes.textField}
-            onChange={date => handleDateChange("endDate", date)}
-            KeyboardButtonProps={{
-              'aria-label': 'change date',
-            }}
+          <FormControlLabel
+            className={classes.checkbox}
+            control={
+              <Checkbox
+                checked={isCurrentContract}
+                color="primary"
+                onChange={e => {
+                  setIsCurrentContract(e.target.checked);
+                  handleDateChange("endDate", null);
+                }}
+              />
+            }
+            label="Present?"
           />
+
+          {!isCurrentContract ? (
+            <KeyboardDatePicker
+              disabled={isCurrentContract}
+              disableFuture
+              variant="inline"
+              format={"MMMM DD, yyyy"}
+              label="End Date"
+              value={props.inputData.endDate}
+              className={classes.textField}
+              onChange={date => handleDateChange("endDate", date)}
+              KeyboardButtonProps={{
+                'aria-label': 'change date',
+              }}
+            />
+          ): null}
+
         </Grid>
       </MuiPickersUtilsProvider>
     </Grid>
