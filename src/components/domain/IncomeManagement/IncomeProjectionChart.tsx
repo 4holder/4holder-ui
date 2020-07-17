@@ -64,6 +64,7 @@ const IncomeProjectionChart: React.FC<RouteComponentProps> = () => {
           .financialMovements
           .map(f => ({
             month: f.dateTime.getMonth(),
+            year: f.dateTime.getFullYear(),
             grossIncome: f.amount.amount/100,
           })) : [];
 
@@ -83,15 +84,13 @@ const IncomeProjectionChart: React.FC<RouteComponentProps> = () => {
             discount: f.amount.amount/100,
           })) : [];
 
-        const chartData: IDataItem[] = grossIncomeChartData.map((grossIncomeChartData, i) => ({
-          ...netIncomeChartData[i],
-          ...discountsChartData[i],
-          ...grossIncomeChartData,
-        }))
-          .sort((a,b)=> a.month - b.month)
-          .map(v => (
-            {...v, month: monthLabels[v.month]}
-          ));
+        const chartData: IDataItem[] = grossIncomeChartData
+          .map((grossIncomeChartData, i) => ({
+            ...netIncomeChartData[i],
+            ...discountsChartData[i],
+            ...grossIncomeChartData,
+          }))
+          .map(v => ({...v, month: `${monthLabels[v.month]}/${v.year}`}));
 
         setProjections(chartData);
       });
