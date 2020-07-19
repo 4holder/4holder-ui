@@ -11,7 +11,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import AddIcon from '@material-ui/icons/Add';
-import {IncomeResume} from "./types";
+import {FinancialMovementsProjection, IncomeResume} from "./types";
 import Dinero from "dinero.js";
 import IncomeProjectionChart from "./IncomeProjectionChart";
 import {useQuery} from 'react-apollo';
@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 	})
 );
 
-export const GET_FINANCIAL_CONTRACTS_QUERY = gql`
+export const INCOME_PAGE_DATA_QUERY = gql`
 query($page: Int!, $pageSize: Int!) {
   incomeResumes: getIncomeResumes(page: $page, pageSize: $pageSize) {
     id
@@ -51,17 +51,30 @@ query($page: Int!, $pageSize: Int!) {
       currency
     }
   }
+  
+  projections: getIncomeProjections(page: $page, pageSize: $pageSize) {
+    label
+    currency
+    financialMovements {
+      amount {
+        amount: valueInCents
+        currency
+      }
+      dateTime
+    }
+  }
 }
 `;
 
 interface IncomeResumes {
 	incomeResumes: IncomeResume[];
+	projections: FinancialMovementsProjection[];
 }
 
 const IncomeList: React.FC<RouteComponentProps> = () => {
 	const classes = useStyles();
 
-	const { loading, data: incomeData } = useQuery<IncomeResumes>(GET_FINANCIAL_CONTRACTS_QUERY, {
+	const { loading, data, refetch } = useQuery<IncomeResumes>(INCOME_PAGE_DATA_QUERY, {
 		variables: {
 			page: 1,
 			pageSize: 100,
@@ -69,15 +82,21 @@ const IncomeList: React.FC<RouteComponentProps> = () => {
 	});
 
 	const [ incomeResumes, setIncomeResumes ] = useState<IncomeResume[]>([]);
+	const [ projections, setProjections ] = useState<FinancialMovementsProjection[]>([]);
 
 	useEffect(() => {
-		if(incomeData && incomeData.incomeResumes) {
-			setIncomeResumes(incomeData.incomeResumes);
+		if(data && data.incomeResumes) {
+			setIncomeResumes(data.incomeResumes);
 		}
-	}, [incomeData]);
+
+		if(data && data.projections) {
+			setProjections(data.projections);
+		}
+	}, [data]);
 
 	const removeResume = (id: string) => {
 		setIncomeResumes(incomeResumes.filter(i => i.id !== id));
+		refetch();
 	};
 
 	if (loading) {
@@ -144,7 +163,7 @@ const IncomeList: React.FC<RouteComponentProps> = () => {
 				</Grid>
 
 				<Grid item xs={12}>
-					<IncomeProjectionChart />
+					<IncomeProjectionChart projections={projections} />
 				</Grid>
 			</Grid>
 		</AuthenticatedPage>

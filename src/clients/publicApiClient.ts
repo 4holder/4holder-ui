@@ -6,7 +6,6 @@ import {createHttpLink} from 'apollo-link-http';
 
 import auth from "../auth/auth";
 import config from "../config";
-import {FinancialMovementsProjection, ProjectionPoint} from "../components/domain/IncomeManagement/types";
 
 // @ts-ignore
 const httpLink = createHttpLink({
@@ -52,43 +51,6 @@ export const getUserProfile: () => Promise<UserProfile> = () => {
     .then(result => result.data.userProfile);
 };
 
-export const GET_FINANCIAL_CONTRACTS_QUERY = gql`
-query($page: Int!, $pageSize: Int!) {
-  getIncomeResumes(page: $page, pageSize: $pageSize) {
-    id
-    name
-    yearlyGrossIncome {
-      amount: valueInCents
-      currency
-    }
-    yearlyNetIncome {
-      amount: valueInCents
-      currency
-    }
-    yearlyIncomeDiscount {
-      amount: valueInCents
-      currency
-    }
-  }
-}
-`;
-
-export const GET_PROJECTIONS_QUERY = gql`
-query($page: Int!, $pageSize: Int!) {
-  getIncomeProjections(page: $page, pageSize: $pageSize) {
-    label
-    currency
-    financialMovements {
-      amount {
-        amount: valueInCents
-        currency
-      }
-      dateTime
-    }
-  }
-}
-`;
-
 export const importAuth0User: () => Promise<UserProfile> = async () => {
   return apolloClient
     .mutate({
@@ -103,44 +65,3 @@ export const importAuth0User: () => Promise<UserProfile> = async () => {
     .then(result => result.data.baseCLTContract);
 };
 
-export const getIncomeResumes = (page: number, pageSize: number) => {
-  type Variables = {
-    page: number;
-    pageSize: number;
-  }
-  const variables = {
-    page,
-    pageSize,
-  } as Variables;
-
-  return apolloClient
-    .query({
-      query: GET_FINANCIAL_CONTRACTS_QUERY,
-      variables
-    } as QueryOptions<Variables>)
-    .then(result => result.data.getIncomeResumes);
-};
-
-export const getIncomeProjections = (page: number = 1, pageSize: number = 100) => {
-  type Variables = {
-    page: number;
-    pageSize: number;
-  }
-  const variables = {
-    page,
-    pageSize,
-  } as Variables;
-
-  return apolloClient
-    .query({
-      query: GET_PROJECTIONS_QUERY,
-      variables
-    } as QueryOptions<Variables>)
-    .then(result => result.data.getIncomeProjections.map((projection: FinancialMovementsProjection) => ({
-      ...projection,
-      financialMovements: projection.financialMovements.map((point : ProjectionPoint) => ({
-        ...point,
-        dateTime: new Date(point.dateTime.toString()),
-      })),
-    })));
-};

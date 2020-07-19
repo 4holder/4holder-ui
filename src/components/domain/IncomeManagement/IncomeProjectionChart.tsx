@@ -1,18 +1,8 @@
 import * as React from 'react';
-import {useEffect, useState} from 'react';
 import Paper from '@material-ui/core/Paper';
 import {ArgumentAxis, BarSeries, Chart, Legend, Tooltip, ValueAxis,} from '@devexpress/dx-react-chart-material-ui';
 import {ArgumentScale, EventTracker, HoverState, Stack, ValueScale} from '@devexpress/dx-react-chart';
-import {RouteComponentProps} from "@reach/router";
 import {FinancialMovementsProjection} from "./types";
-import {getIncomeProjections} from "../../../clients/publicApiClient";
-
-interface IDataItem {
-  month: string,
-  grossIncome: number,
-  netIncome: number,
-  discount: number,
-}
 
 interface MonthLabels {
   [key: number]: string;
@@ -51,54 +41,56 @@ const TooltipContent = ({text, props}: any) => {
   );
 };
 
-const IncomeProjectionChart: React.FC<RouteComponentProps> = () => {
+export interface ProjectionItem {
+  month: string,
+  grossIncome: number,
+  netIncome: number,
+  discount: number,
+}
 
-  const [projections, setProjections] = useState<IDataItem[]>([]);
+interface IncomeProjectionChartProps {
+  projections: FinancialMovementsProjection[],
+}
 
-  useEffect(() => {
-    getIncomeProjections(1, 100)
-      .then((projections: FinancialMovementsProjection[]) => {
-        const grossIncomeProjections = projections.find(p => p.label === 'Gross Income');
+const IncomeProjectionChart: React.FC<IncomeProjectionChartProps> = (props) => {
 
-        const grossIncomeChartData = grossIncomeProjections ? grossIncomeProjections
-          .financialMovements
-          .map(f => ({
-            month: f.dateTime.getMonth(),
-            year: f.dateTime.getFullYear(),
-            grossIncome: f.amount.amount/100,
-          })) : [];
+  const grossIncomeProjections = props.projections.find(p => p.label === 'Gross Income');
 
-        const netIncomeProjections = projections.find(p => p.label === 'Net Income');
+  const grossIncomeChartData = grossIncomeProjections ? grossIncomeProjections
+    .financialMovements
+    .map(f => ({
+      month: new Date(f.dateTime).getMonth(),
+      year: new Date(f.dateTime).getFullYear(),
+      grossIncome: f.amount.amount/100,
+    })) : [];
 
-        const netIncomeChartData = netIncomeProjections ? netIncomeProjections
-          .financialMovements
-          .map(f => ({
-            netIncome: f.amount.amount/100,
-          })) : [];
+  const netIncomeProjections = props.projections.find(p => p.label === 'Net Income');
 
-        const discountProjections = projections.find(p => p.label === 'Discounts');
+  const netIncomeChartData = netIncomeProjections ? netIncomeProjections
+    .financialMovements
+    .map(f => ({
+      netIncome: f.amount.amount/100,
+    })) : [];
 
-        const discountsChartData = discountProjections ? discountProjections
-          .financialMovements
-          .map(f => ({
-            discount: f.amount.amount/100,
-          })) : [];
+  const discountProjections = props.projections.find(p => p.label === 'Discounts');
 
-        const chartData: IDataItem[] = grossIncomeChartData
-          .map((grossIncomeChartData, i) => ({
-            ...netIncomeChartData[i],
-            ...discountsChartData[i],
-            ...grossIncomeChartData,
-          }))
-          .map(v => ({...v, month: `${monthLabels[v.month]}/${v.year}`}));
+  const discountsChartData = discountProjections ? discountProjections
+    .financialMovements
+    .map(f => ({
+      discount: f.amount.amount/100,
+    })) : [];
 
-        setProjections(chartData);
-      });
-  }, []);
+  const chartData: ProjectionItem[]  = grossIncomeChartData
+    .map((grossIncomeChartData, i) => ({
+      ...netIncomeChartData[i],
+      ...discountsChartData[i],
+      ...grossIncomeChartData,
+    }))
+    .map(v => ({...v, month: `${monthLabels[v.month]}/${v.year}`}));
 
   return (
     <Paper>
-      <Chart data={projections} height={300}>
+      <Chart data={chartData} height={300}>
         <ArgumentScale />
         <ArgumentAxis />
         <ValueAxis labelComponent={PriceLabel}/>
