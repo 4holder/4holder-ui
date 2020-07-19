@@ -1,5 +1,5 @@
 import fetch from 'node-fetch';
-import {gql, InMemoryCache, QueryOptions} from 'apollo-boost';
+import {gql, InMemoryCache} from 'apollo-boost';
 import ApolloClient from 'apollo-client';
 import {setContext} from 'apollo-link-context';
 import {createHttpLink} from 'apollo-link-http';
