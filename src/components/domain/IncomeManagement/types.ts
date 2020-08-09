@@ -41,29 +41,3 @@ export interface FinancialMovementsProjection {
   currency: String;
   financialMovements: ProjectionPoint[];
 }
-
-export interface IncomeDiscount {
-  name: string;
-  amount: Amount;
-  discountType: DiscountType;
-}
-
-export interface Income {
-  name: string;
-  amount: Amount;
-  incomeType: IncomeType;
-  occurrences: Occurrences;
-  discounts: IncomeDiscount[];
-}
-
-export interface FinancialContract {
-  name: string;
-  contractType: ContractType;
-  companyCnpj?: string;
-  startDate: Date;
-  endDate?: Date;
-  incomes: Income[];
-  grossSalary: number;
-  dependentsQuantity: number;
-  deductions: number;
-}

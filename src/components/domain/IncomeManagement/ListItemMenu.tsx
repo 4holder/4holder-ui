@@ -3,6 +3,7 @@ import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import React from "react";
 import {useMutation} from "@apollo/react-hooks";
 import {gql} from "apollo-boost";
+import {navigate} from "@reach/router";
 
 export const REMOVE_FINANCIAL_CONTRACT = gql`
 mutation RemoveFinancialContract($id: String!) {
@@ -57,7 +58,8 @@ const ListItemMenu: React.FC<ListItemMenuProps> = (props) => {
         open={open}
         onClose={handleClose}
       >
-      <MenuItem onClick={handleRemoveContract}>Remove</MenuItem>
+        <MenuItem onClick={handleRemoveContract}>Remove</MenuItem>
+        <MenuItem onClick={_ => navigate(`/incomeDetails/${props.id}`)}>Details</MenuItem>
       </Menu>
     </div>
   );

@@ -12,6 +12,7 @@ import green from '@material-ui/core/colors/green';
 import { IncomeList, NewIncome } from "./components/domain/IncomeManagement";
 import { ApolloProvider } from 'react-apollo';
 import { apolloClient } from "./clients/publicApiClient";
+import IncomeDetails from "./components/domain/IncomeManagement/IncomeDetails";
 
 const theme = createMuiTheme({
   palette: {
@@ -28,6 +29,7 @@ const App = () => {
         <Dashboard path="/dashboard" />
         <IncomeList path="/incomes" />
         <NewIncome path="/incomes/new" />
+        <IncomeDetails path="/incomeDetails/:id" />
         <Home path='/' />
         <Callback path='/callback' />
         <NotFound default path="/not_found" />
