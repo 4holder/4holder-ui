@@ -80,14 +80,21 @@ const Review: React.FC<ReviewFormProps> = (props) => {
                           <TableCell colSpan={3}>{toMonetaryVisualization(income.amount)}</TableCell>
                         </TableRow>
                         <TableRow>
-                          <TableCell rowSpan={5}>Discounts</TableCell>
+                          <TableCell rowSpan={
+                            income.discounts.length > 0 ? income.discounts.length + 1 : 0
+                          }>Discounts</TableCell>
                         </TableRow>
-                        {income.discounts.map((discount, index) => (
+                        {(income.discounts.length > 0) ?
+                          income.discounts.map((discount, index) => (
+                            <TableRow key={index}>
+                              <TableCell>{discount.discountType}</TableCell>
+                              <TableCell colSpan={2}>{toMonetaryVisualization(discount.amount)}</TableCell>
+                            </TableRow>
+                          )) :
                           <TableRow key={index}>
-                            <TableCell>{discount.discountType}</TableCell>
-                            <TableCell colSpan={2}>{toMonetaryVisualization(discount.amount)}</TableCell>
+                            <TableCell>No Discount</TableCell>
                           </TableRow>
-                        ))}
+                        }
                       </TableBody>
                     </Table>
                   </TableContainer>

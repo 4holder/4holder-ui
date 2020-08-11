@@ -245,14 +245,21 @@ const IncomeDetails: React.FC<RouteComponentProps<DetailsParams>> = (props) => {
                           <TableCell colSpan={3}>{Dinero(income.netAmount).toFormat()}</TableCell>
                         </TableRow>
                         <TableRow>
-                          <TableCell rowSpan={5}>Discounts</TableCell>
+                          <TableCell rowSpan={
+                            income.discounts.length > 0 ? income.discounts.length + 1 : 0
+                          }>Discounts</TableCell>
                         </TableRow>
-                        {income.discounts.map((discount, index) => (
-                          <TableRow key={index}>
-                            <TableCell>{discount.discountType}</TableCell>
-                            <TableCell colSpan={2}>{Dinero(discount.amount).toFormat()}</TableCell>
-                          </TableRow>
-                        ))}
+                        {(income.discounts.length > 0) ?
+                          income.discounts.map((discount, index) => (
+                            <TableRow key={index}>
+                              <TableCell>{discount.discountType}</TableCell>
+                              <TableCell colSpan={2}>{Dinero(discount.amount).toFormat()}</TableCell>
+                            </TableRow>
+                          )) :
+                            <TableRow key={index}>
+                              <TableCell>No Discount</TableCell>
+                            </TableRow>
+                        }
                       </TableBody>
                     </Table>
                   </TableContainer>
